@@ -97,7 +97,7 @@ export function QualityResult({ result, imageUrl }: QualityResultProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Quality Status */}
-        <div className={`${config.bgColor} rounded-lg p-6 text-center`}>
+        <div className={`${config.bgColor} rounded-none p-6 text-center`}>
           <Icon className={`h-16 w-16 mx-auto mb-4 ${config.color}`} />
           <h3 className="text-2xl font-bold mb-2">{config.label}</h3>
           <p className="text-sm text-muted-foreground mb-4">{config.description}</p>
@@ -142,7 +142,7 @@ export function QualityResult({ result, imageUrl }: QualityResultProps) {
               <FileText className="h-4 w-4" />
               Label Information
             </h4>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+            <div className="bg-gray-50 rounded-none p-4 space-y-2 text-sm">
               {result.ocr.brandName && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Brand:</span>
@@ -206,7 +206,7 @@ export function QualityResult({ result, imageUrl }: QualityResultProps) {
         )}
 
         {/* Recommendation */}
-        <div className="bg-blue-50 rounded-lg p-4">
+        <div className="bg-blue-50 rounded-none p-4">
           <h4 className="font-semibold mb-2 text-blue-900">Recommendation</h4>
           <p className="text-sm text-blue-800">{result.recommendation}</p>
         </div>
@@ -214,7 +214,7 @@ export function QualityResult({ result, imageUrl }: QualityResultProps) {
         {/* Image Preview */}
         <div className="space-y-2">
           <h4 className="font-semibold text-sm">Analyzed Image</h4>
-          <div className="relative aspect-video rounded-lg overflow-hidden border">
+          <div className="relative aspect-video rounded-none overflow-hidden border">
             <img
               src={imageUrl}
               alt="Analyzed seed"

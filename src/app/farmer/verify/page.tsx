@@ -20,24 +20,34 @@ type Step = 'upload' | 'processing' | 'result';
 
 export default function VerifyPage() {
   const [step, setStep] = useState<Step>('upload');
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [frontImage, setFrontImage] = useState<File | null>(null);
+  const [backImage, setBackImage] = useState<File | null>(null);
   const [result, setResult] = useState<VerificationResult | null>(null);
 
-  const handleImageSelect = (file: File) => {
-    setSelectedImage(file);
+  const handleFrontImageSelect = (file: File) => {
+    setFrontImage(file);
   };
 
-  const handleImageRemove = () => {
-    setSelectedImage(null);
+  const handleBackImageSelect = (file: File) => {
+    setBackImage(file);
+  };
+
+  const handleFrontImageRemove = () => {
+    setFrontImage(null);
+  };
+
+  const handleBackImageRemove = () => {
+    setBackImage(null);
   };
 
   const handleVerify = async () => {
-    if (!selectedImage) return;
+    if (!frontImage || !backImage) return;
     
     setStep('processing');
 
     const formData = new FormData();
-    formData.append('image', selectedImage);
+    formData.append('frontImage', frontImage);
+    formData.append('backImage', backImage);
 
     try {
       const verificationResult = await uploadAndVerify(formData);
@@ -51,7 +61,8 @@ export default function VerifyPage() {
 
   const resetForm = () => {
     setStep('upload');
-    setSelectedImage(null);
+    setFrontImage(null);
+    setBackImage(null);
     setResult(null);
   };
 
@@ -81,7 +92,7 @@ export default function VerifyPage() {
         </p>
       </motion.div>
 
-      {/* Progress Steps - Now only 2 steps */}
+      {/* Progress Steps - Now front/back selection + result */}
       <div className="flex items-center gap-2">
         {['upload', 'result'].map((s, i) => (
           <div key={s} className="flex items-center">
@@ -123,18 +134,21 @@ export default function VerifyPage() {
               <CardHeader className="border-b border-neutral-200 pb-4">
                 <CardTitle className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
                   <Upload className="h-5 w-5 text-emerald-800" />
-                  Upload Image
+                  Upload Seed Packet Images
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-6">
                 <ImageUploader
-                  onImageSelect={handleImageSelect}
-                  onImageRemove={handleImageRemove}
-                  selectedImage={selectedImage}
+                  onFrontImageSelect={handleFrontImageSelect}
+                  onBackImageSelect={handleBackImageSelect}
+                  onFrontImageRemove={handleFrontImageRemove}
+                  onBackImageRemove={handleBackImageRemove}
+                  frontImage={frontImage}
+                  backImage={backImage}
                 />
                 <Button
                   onClick={handleVerify}
-                  disabled={!selectedImage}
+                  disabled={!frontImage || !backImage}
                   className="w-full rounded-none bg-emerald-800 hover:bg-emerald-900"
                 >
                   Verify Product

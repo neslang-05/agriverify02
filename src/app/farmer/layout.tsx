@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   CheckCircle2,
+  MessageSquareWarning,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/app/actions/auth';
@@ -23,6 +24,7 @@ const navItems = [
   { href: '/farmer/quality', label: 'Quality Check', icon: CheckCircle2 },
   { href: '/farmer/verify', label: 'Verify Product', icon: Search },
   { href: '/farmer/recommendations', label: 'Recommendations', icon: Sprout },
+  { href: '/farmer/complaints', label: 'My Complaints', icon: MessageSquareWarning },
   { href: '/farmer/chat', label: 'AI Assistant', icon: MessageSquare },
 ];
 

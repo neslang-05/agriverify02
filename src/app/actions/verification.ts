@@ -2,10 +2,8 @@
 
 import { BLACKLISTED_BRANDS, MOCK_OCR_RESPONSES, SEED_REGISTRY } from '@/lib/constants';
 import { VerificationStatus, VerificationResult, Product, SeedRecommendation } from '@/types';
-<<<<<<< HEAD
 import { getOpenAIClient } from '@/lib/azure/openai';
 import { AGRICULTURAL_KNOWLEDGE_BASE } from '@/lib/knowledge-base';
-=======
 import { classifyWithFallback } from '@/lib/azure/custom-vision-fallback';
 import { performOCR, OCRResult } from '@/lib/azure/computer-vision-ocr';
 import { saveVerificationHistory } from './history';
@@ -30,7 +28,6 @@ interface HybridVerificationResult extends VerificationResult {
   };
   riskFactors?: string[];
 }
->>>>>>> testAIvision
 
 // Simulated verification logic
 function analyzeProduct(detectedText: string): {

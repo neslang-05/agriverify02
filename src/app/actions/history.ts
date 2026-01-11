@@ -145,3 +145,32 @@ export async function deleteVerificationHistoryItem(id: string) {
     };
   }
 }
+
+export async function getUserVerifications() {
+  try {
+    const supabase = await createClient();
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from("packet_verifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error("Error fetching user verifications:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getUserVerifications:", error);
+    return [];
+  }
+}
