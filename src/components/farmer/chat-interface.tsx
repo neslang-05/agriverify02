@@ -76,8 +76,8 @@ export function ChatInterface({ onSendMessage, initialMessages = [] }: ChatInter
             <Bot className="h-5 w-5 text-emerald-800" />
           </div>
           <div>
-            <h3 className="font-semibold text-neutral-900">Agricultural Assistant</h3>
-            <p className="text-xs text-neutral-500">Ask about seeds, fertilizers & farming</p>
+            <h3 className="font-semibold text-neutral-900">AI Agricultural Assistant</h3>
+            <p className="text-xs text-neutral-500">Powered by Azure OpenAI</p>
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@ export function ChatInterface({ onSendMessage, initialMessages = [] }: ChatInter
             >
               <Bot className="h-12 w-12 mx-auto text-neutral-300 mb-4" />
               <p className="text-neutral-500">
-                Hello! I&apos;m your agricultural assistant. Ask me about seed verification, farming recommendations, or any agricultural queries.
+                Hello! I'm your AI agricultural assistant powered by advanced language models. I have extensive knowledge about farming practices, seed verification, crop recommendations, and agricultural best practices. Ask me anything about agriculture!
               </p>
             </motion.div>
           )}

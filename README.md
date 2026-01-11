@@ -1,36 +1,155 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fake Seed Detection System
+
+A Next.js application for detecting counterfeit agricultural seeds and fertilizers using AI-powered verification and an intelligent chat assistant.
+
+## Features
+
+- **Seed & Fertilizer Verification**: Upload images of product packaging for AI-powered authenticity verification
+- **AI Chat Assistant**: Get farming advice and recommendations from an Azure OpenAI-powered chatbot with custom agricultural knowledge base
+- **Analytics Dashboard**: Monitor verification trends and user activity
+- **Multi-role Support**: Separate interfaces for farmers and agricultural officers
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
+- **AI/ML**: Azure Computer Vision, Azure Custom Vision, Azure OpenAI
+- **Database**: Supabase
+- **UI Components**: Radix UI, Framer Motion
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Azure subscription with access to:
+  - Azure Computer Vision
+  - Azure Custom Vision
+  - Azure OpenAI Service
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd fake-seed-detection
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Copy environment variables:
+```bash
+cp .env.local.example .env.local
+```
+
+4. Configure your environment variables in `.env.local`:
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Azure Computer Vision
+AZURE_COMPUTER_VISION_ENDPOINT=your-vision-endpoint
+AZURE_COMPUTER_VISION_KEY=your-vision-key
+
+# Azure Custom Vision
+AZURE_CUSTOM_VISION_PREDICTION_URL=your-custom-vision-url
+AZURE_CUSTOM_VISION_PREDICTION_KEY=your-custom-vision-key
+AZURE_CUSTOM_VISION_PROJECT_ID=your-project-id
+AZURE_CUSTOM_VISION_ITERATION_NAME=your-iteration-name
+
+# Azure OpenAI (for AI Chat Assistant)
+AZURE_OPENAI_ENDPOINT=your-openai-endpoint
+AZURE_OPENAI_API_KEY=your-openai-key
+AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
+ENABLE_AZURE_OPENAI_CHAT=true
+```
+
+### Azure Setup Instructions
+
+#### 1. Azure Computer Vision
+- Create a Computer Vision resource in Azure Portal
+- Copy the endpoint and key to your environment variables
+
+#### 2. Azure Custom Vision
+- Create a Custom Vision resource
+- Train a model for seed/fertilizer classification
+- Publish the model and note the prediction URL and keys
+
+#### 3. Azure OpenAI
+- Apply for Azure OpenAI access
+- Create an OpenAI resource
+- Deploy a GPT model (e.g., gpt-4o-mini)
+- Copy the endpoint, key, and deployment name
+
+### Running the Application
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                    # Next.js app router
+│   ├── actions/           # Server actions
+│   ├── api/               # API routes
+│   └── farmer/            # Farmer-specific pages
+├── components/            # Reusable UI components
+├── lib/                   # Utility libraries
+│   ├── azure/            # Azure service integrations
+│   └── supabase/         # Database client
+└── types/                # TypeScript type definitions
+```
 
-## Learn More
+## AI Chat Assistant
 
-To learn more about Next.js, take a look at the following resources:
+The application includes an intelligent chat assistant powered by Azure OpenAI with a custom knowledge base covering:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Seed verification procedures
+- Crop recommendations by region
+- Fertilizer guidelines
+- Pest management
+- Sustainable farming practices
+- Government agricultural schemes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The assistant provides context-aware responses based on the integrated knowledge base and can guide users through the verification process.
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Available Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+### Testing
+
+```bash
+npm run test
+```
+
+## Deployment
+
+The application can be deployed to Vercel, Netlify, or any Node.js hosting platform.
+
+For production deployment, ensure all Azure services are properly configured and environment variables are set.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

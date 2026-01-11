@@ -2,6 +2,8 @@
 
 import { BLACKLISTED_BRANDS, MOCK_OCR_RESPONSES, SEED_REGISTRY } from '@/lib/constants';
 import { VerificationStatus, VerificationResult, Product, SeedRecommendation } from '@/types';
+import { getOpenAIClient } from '@/lib/azure/openai';
+import { AGRICULTURAL_KNOWLEDGE_BASE } from '@/lib/knowledge-base';
 
 // Simulated verification logic
 function analyzeProduct(detectedText: string): {
@@ -133,8 +135,47 @@ export async function getSeedRecommendations(
 }
 
 export async function getChatResponse(message: string, userId: string): Promise<string> {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Check if Azure OpenAI is enabled
+  if (process.env.ENABLE_AZURE_OPENAI_CHAT !== 'true') {
+    return getFallbackResponse(message);
+  }
 
+  try {
+    const client = getOpenAIClient();
+    const deployment = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o-mini';
+
+    const systemPrompt = `You are an agricultural assistant specializing in seed verification, farming practices, and crop recommendations. You have access to the following knowledge base:
+
+${AGRICULTURAL_KNOWLEDGE_BASE}
+
+Instructions:
+- Provide helpful, accurate information based on the knowledge base
+- Be friendly and professional
+- If asked about seed verification, guide users to use the verification system
+- For crop recommendations, suggest certified varieties and best practices
+- Always emphasize buying from authorized dealers and checking certifications
+- If you don't have specific information, suggest consulting local agricultural experts
+- Keep responses concise but informative
+- Use simple language that farmers can understand`;
+
+    const response = await client.chat.completions.create({
+      model: deployment,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message }
+      ],
+      max_completion_tokens: 500,
+    });
+
+    return response.choices[0]?.message?.content || 'I apologize, but I encountered an error. Please try again.';
+  } catch (error) {
+    console.error('OpenAI chat error:', error);
+    // Fallback to simple responses if OpenAI fails
+    return getFallbackResponse(message);
+  }
+}
+
+function getFallbackResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
 
   if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {

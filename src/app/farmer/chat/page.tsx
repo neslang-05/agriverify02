@@ -22,7 +22,7 @@ export default function ChatPage() {
       >
         <h1 className="text-2xl font-bold text-neutral-900">AI Assistant</h1>
         <p className="text-neutral-500 mt-1">
-          Get guidance on seeds, fertilizers, and farming practices.
+          Get guidance on seeds, fertilizers, and farming practices with AI-powered responses.
         </p>
       </motion.div>
 
