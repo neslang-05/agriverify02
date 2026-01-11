@@ -2,8 +2,35 @@
 
 import { BLACKLISTED_BRANDS, MOCK_OCR_RESPONSES, SEED_REGISTRY } from '@/lib/constants';
 import { VerificationStatus, VerificationResult, Product, SeedRecommendation } from '@/types';
+<<<<<<< HEAD
 import { getOpenAIClient } from '@/lib/azure/openai';
 import { AGRICULTURAL_KNOWLEDGE_BASE } from '@/lib/knowledge-base';
+=======
+import { classifyWithFallback } from '@/lib/azure/custom-vision-fallback';
+import { performOCR, OCRResult } from '@/lib/azure/computer-vision-ocr';
+import { saveVerificationHistory } from './history';
+
+interface VisionAIResult {
+  tag: string;
+  confidence: number;
+  seedVariety?: string;
+}
+
+interface HybridVerificationResult extends VerificationResult {
+  visionAI?: VisionAIResult;
+  ocr?: {
+    detectedText: string;
+    brandName?: string;
+    certificationNumber?: string;
+    batchNumber?: string;
+    manufacturingDate?: string;
+    expiryDate?: string;
+    confidence: number;
+    suspiciousFlags?: string[];
+  };
+  riskFactors?: string[];
+}
+>>>>>>> testAIvision
 
 // Simulated verification logic
 function analyzeProduct(detectedText: string): {
@@ -89,14 +116,180 @@ function analyzeProduct(detectedText: string): {
   };
 }
 
-export async function uploadAndVerify(formData: FormData): Promise<VerificationResult> {
+// Helper functions for text extraction
+function extractBrandName(text: string): string | undefined {
+  const brandMatch = text.match(/Brand[:\s]+([A-Za-z0-9\s]+)/i);
+  return brandMatch ? brandMatch[1].trim() : undefined;
+}
+
+function extractCertificationNumber(text: string): string | undefined {
+  const certMatch = text.match(/(?:Cert|Certification|License|Lic)[:\s#]+([A-Z0-9\-\/]+)/i);
+  return certMatch ? certMatch[1].trim() : undefined;
+}
+
+function isBlacklistedBrand(brand?: string): boolean {
+  if (!brand) return false;
+  return BLACKLISTED_BRANDS.some(b => brand.toLowerCase().includes(b.toLowerCase()));
+}
+
+// Vision AI verification with OCR
+function performVisionVerification(
+  visionResult: any,
+  cropType: string,
+  district: string,
+  ocrResult?: OCRResult
+): HybridVerificationResult {
+  const riskFactors: string[] = [];
+  let baseConfidence = visionResult.topPrediction.confidence;
+
+  // Vision AI primary check - Pure/Negative classification
+  const tag = visionResult.topPrediction.tag.toLowerCase();
+  
+  if (tag === 'negative' || !visionResult.isAuthentic) {
+    riskFactors.push('Vision AI detected low quality or counterfeit characteristics');
+  }
+
+  // Add OCR-based risk factors if available
+  if (ocrResult && ocrResult.suspiciousFlags && ocrResult.suspiciousFlags.length > 0) {
+    riskFactors.push(...ocrResult.suspiciousFlags);
+  }
+
+  // Determine final status based on tag and confidence
+  const finalConfidence = Math.max(0, Math.min(100, baseConfidence));
+  let status: VerificationStatus;
+  
+  if (tag === 'pure' && finalConfidence >= 60) {
+    status = 'genuine';
+  } else if (tag === 'negative') {
+    status = finalConfidence >= 50 ? 'suspicious' : 'fake';
+  } else {
+    status = finalConfidence >= 75 ? 'genuine' 
+           : finalConfidence >= 50 ? 'suspicious' 
+           : 'fake';
+  }
+
+  // Generate recommendation and risk explanation
+  const { riskExplanation, recommendations } = generateRecommendation(status, riskFactors, visionResult);
+
+  return {
+    id: crypto.randomUUID(),
+    product_id: crypto.randomUUID(),
+    status,
+    confidence: Math.round(finalConfidence),
+    detected_text: ocrResult?.detectedText || '',
+    risk_explanation: riskExplanation,
+    recommendations,
+    verified_at: new Date().toISOString(),
+    visionAI: {
+      tag: visionResult.topPrediction.tag,
+      confidence: visionResult.topPrediction.confidence,
+      seedVariety: visionResult.seedVariety
+    },
+    ocr: ocrResult ? {
+      detectedText: ocrResult.detectedText,
+      brandName: ocrResult.brandName,
+      certificationNumber: ocrResult.certificationNumber,
+      batchNumber: ocrResult.batchNumber,
+      manufacturingDate: ocrResult.manufacturingDate,
+      expiryDate: ocrResult.expiryDate,
+      confidence: ocrResult.confidence * 100,
+      suspiciousFlags: ocrResult.suspiciousFlags
+    } : undefined,
+    riskFactors
+  };
+}
+
+function generateRecommendation(
+  status: VerificationStatus,
+  risks: string[],
+  visionResult: any
+): { riskExplanation: string; recommendations: string[] } {
+  if (status === 'genuine') {
+    const riskExplanation = `This seed packet appears authentic. ${visionResult.seedVariety ? `Detected variety: ${visionResult.seedVariety}.` : ''} The product shows all characteristics of a genuine certified product with proper labeling and high AI confidence score.`;
+    const recommendations = [
+      'Safe to use for farming',
+      'Store in cool, dry place away from moisture',
+      'Follow recommended dosage on package',
+      'Check expiry date before use',
+      'Keep receipt for warranty purposes'
+    ];
+    return { riskExplanation, recommendations };
+  } else if (status === 'suspicious') {
+    const riskExplanation = `This product shows suspicious characteristics: ${risks.join(', ')}. The verification system has identified potential authenticity concerns that require further investigation.`;
+    const recommendations = [
+      'Verify with local agricultural officer before use',
+      'Cross-check batch number with manufacturer hotline',
+      'Request invoice and guarantee from seller',
+      'Consider purchasing from government-authorized dealer',
+      'Document product details for potential complaint'
+    ];
+    return { riskExplanation, recommendations };
+  } else {
+    const riskExplanation = `Warning: High probability of counterfeit product. Multiple verification failures detected: ${risks.join(', ')}. This product does not meet authenticity standards.`;
+    const recommendations = [
+      'Do not use this product on your crops',
+      'Report to local agricultural office immediately',
+      'Request full refund from seller',
+      'Document purchase details for legal complaint',
+      'Purchase only from authorized dealers with valid licenses'
+    ];
+    return { riskExplanation, recommendations };
+  }
+}
+
+export async function uploadAndVerify(formData: FormData): Promise<HybridVerificationResult> {
   // Simulate processing delay
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   const cropType = formData.get('cropType') as string;
   const district = formData.get('district') as string;
+  const file = formData.get('image') as File;
 
-  // Randomly select OCR response for demo
+  try {
+    // Check if Azure Custom Vision is configured
+    const isAzureConfigured = process.env.AZURE_CUSTOM_VISION_PREDICTION_KEY && 
+                              process.env.AZURE_CUSTOM_VISION_ENDPOINT;
+
+    if (isAzureConfigured && file) {
+      // Convert file to buffer for Azure Vision API
+      const arrayBuffer = await file.arrayBuffer();
+      const imageBuffer = Buffer.from(arrayBuffer);
+      
+      // Create temporary URL for the image
+      const imageUrl = `data:${file.type};base64,${imageBuffer.toString('base64')}`;
+
+      // Execute Vision AI classification and OCR in parallel
+      const [visionResult, ocrResult] = await Promise.all([
+        classifyWithFallback(imageBuffer, imageUrl),
+        performOCR(imageBuffer).catch(err => {
+          console.error('OCR failed:', err);
+          return undefined;
+        })
+      ]);
+
+      // Perform verification based on Vision AI result and OCR
+      const result = performVisionVerification(visionResult, cropType, district, ocrResult);
+      
+      // Save to history (non-blocking)
+      // Note: confidence from Azure is already 0-100, convert to 0-1 for database
+      saveVerificationHistory({
+        image_url: imageUrl,
+        status: result.status,
+        confidence: result.confidence / 100,
+        vision_ai_tag: result.visionAI?.tag,
+        vision_ai_confidence: (result.visionAI?.confidence || 0) / 100, // Convert 0-100 to 0-1
+        seed_variety: result.visionAI?.seedVariety,
+        recommendation: result.risk_explanation,
+        risk_factors: result.riskFactors
+      }).catch(err => console.error('Failed to save history:', err));
+      
+      return result;
+    }
+  } catch (error) {
+    console.error('Azure Vision verification failed, falling back to mock:', error);
+  }
+
+  // Fallback to original mock verification if Azure is not configured or fails
   const scenarios = ['genuine', 'suspicious', 'fake'] as const;
   const scenario = scenarios[Math.floor(Math.random() * 3)];
   const ocrResponse = MOCK_OCR_RESPONSES[scenario];
