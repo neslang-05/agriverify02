@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,9 +23,10 @@ import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 interface SelectFromHistoryProps {
   onSelect?: (data: any) => void;
   verifications?: any[];
+  fromScan?: boolean;
 }
 
-export function ComplaintForm({ onSelect, verifications = [] }: SelectFromHistoryProps) {
+export function ComplaintForm({ onSelect, verifications = [], fromScan = false }: SelectFromHistoryProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedVerification, setSelectedVerification] = useState<string | null>(null);
@@ -42,6 +43,16 @@ export function ComplaintForm({ onSelect, verifications = [] }: SelectFromHistor
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [successBatchNumber, setSuccessBatchNumber] = useState('');
+
+  // Pre-fill issue type when coming from scan flow
+  useEffect(() => {
+    if (fromScan) {
+      setFormData((prev) => ({
+        ...prev,
+        issueType: 'fake_seeds' as ComplaintIssueType,
+      }));
+    }
+  }, [fromScan]);
 
   const handleHistorySelect = (verificationId: string) => {
     const verification = verifications.find((v) => v.id === verificationId);

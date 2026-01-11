@@ -1,232 +1,180 @@
-````md
+Here is the updated **Mobile-First User Flow Agent** instruction file. It incorporates your specific 10-step flow, the backend aggregation logic for multiple images, and the "Just-in-Time" authentication strategy.
+
+--- START OF FILE mobile.flow.agent.md ---
+
 # GitHub Copilot Custom Agent Instructions
-## Project: AI-Driven Seed Quality & Authenticity Risk Platform (Hackathon MVP)
+## Mobile-First "Guest" Verification Flow & Logic
 
-You are an expert full-stack engineer, product designer, and AI integration assistant.
-Your goal is to build a camera-first, farmer-friendly web application using Next.js (App Router) and Node.js APIs, optimized for a 48-hour hackathon MVP.
-
-Follow all instructions strictly.
+You are an **Expert Full-Stack Engineer** specializing in **Conversion Rate Optimization (CRO)** and **Mobile UX**. Your task is to implement a friction-free, camera-first experience that converts anonymous farmers into registered users *only* when necessary (during complaint submission).
 
 ---
 
-## 1️⃣ CORE PRODUCT PRINCIPLES
+## 1. Revised Route Structure
 
-- Camera-first UX
-- No forced login for farmers
-- One-click result: Good / Poor / Bad
-- Emoji-based visual feedback
-- Simple logic over complex AI
-- Mobile-first UI
-- Judges must understand value in 30 seconds
+- **`/` (Root):** The Camera/Scanner Interface. (Checks if user is logged in: if YES, show Navbar with Avatar/Dashboard link; if NO, show Camera immediately).
+- **`/about`:** The previous landing page content (Marketing/Info).
+- **`/dashboard/*`:** Protected routes for authenticated users (History, Complaints).
+- **`/api/verify-guest`:** Server Action for processing anonymous images.
 
 ---
 
-## 2️⃣ PRIMARY USER FLOW (FARMER – NO LOGIN REQUIRED)
+## 2. Frontend Flow Implementation (Step-by-Step)
 
-### Landing Page (Default)
-- Full-screen minimal UI
-- Primary CTA: **📷 Take Seed Photo**
-- Subtitle: *Check seed quality before sowing*
+### Step 1-4: Capture & Interaction
+**File:** `app/page.tsx`
+- **Component:** `<CameraScanner />`
+- **Behavior:**
+  - On mount, request camera permissions.
+  - **Viewfinder:** Full screen (minus header).
+  - **Capture Button:** Large circular button at bottom.
+  - **State:** `images: string[]` (Base64). Max 5 images.
+  - **Tray:** Horizontal scroll of captured thumbnails with 'X' to delete.
+  - **Action:** "Analyze Seeds" button appears after 1st image.
 
-### Camera Experience
-- Live camera view (WhatsApp-like)
-- Large circular capture button
-- Browser Camera API
-- Mobile-first layout
+### Step 5-6: Processing UI
+- **Component:** `<ProcessingOverlay />`
+- **Visuals:** 
+  - Full-screen overlay with a **Dark Green** background (`bg-primary-900/90`).
+  - **Animation:** A large circular progress indicator (using `framer-motion` or `lucide-react` Loader).
+  - **Text:** Rotating messages: "Uploading...", "Analyzing Texture...", "Checking Quality...".
 
-### Image Capture Rules
-- Max 5 images
-- After each capture:
-  - Preview
-  - Retake
-  - Delete
-  - Add another image
-- Image counter: `n / 5`
-
-### Analysis
-- Analyze images sequentially
-- Show loading state
-- Per-image result
-
+### Step 7: Simplified Result Display
+- **Component:** `<GuestResultCard result={result} />`
+- **Output:** Clean, non-technical UI.
+  - **Good:** "Good Quality Seed" + 😊 + Green Background.
+  - **Bad:** "Poor Quality / Suspicious" + 😟 + Red/Orange Background.
+  - **Explanation:** 2-3 simple sentences (e.g., "The seed texture looks consistent and pure. No foreign matter detected.").
+- **Actions:**
+  - If **Good**: "Scan Another Batch" (Reset).
+  - If **Bad**: "show File Complaint" (if user click FILE coMPLAINT trigger auth)
 ---
 
-## 3️⃣ AI RESPONSE SIMPLIFICATION
+## 3. Backend Logic: The Aggregator
 
-### AI Output
-- `probability` (0–100)
-- `tag`: `pure` | `negative`
+**File:** `app/actions/guest-verification.ts`
 
-### Conversion Logic
-```ts
-if(probability>=80&&tag==="pure")return"GOOD"
-if(probability>=50&&probability<80)return"POOR"
-return"BAD"
-````
+### Logic: Single vs Multiple Images
+The Custom Vision API returns probabilities (e.g., Pure: 59.9%, Negative: 40%). You must interpret this.
 
-### Farmer Output
+```typescript
+interface Prediction {
+  tagName: string; // 'Pure' | 'Negative' | 'InertMatter'
+  probability: number; // 0.0 to 1.0
+}
 
-* 🟢 Good Seed
-* 🟡 Poor Quality
-* 🔴 Bad Seed
+export async function processGuestImages(base64Images: string[]) {
+  // 1. Upload images to Custom Vision in parallel
+  const results = await Promise.all(base64Images.map(img => classifyImage(img)));
 
-No raw scores shown.
+  // 2. Aggregation Logic
+  let badScoreSum = 0;
+  let goodScoreSum = 0;
+  let isFlagged = false;
 
----
+  results.forEach(res => {
+    const negative = res.predictions.find(p => p.tagName === 'Negative')?.probability || 0;
+    const pure = res.predictions.find(p => p.tagName === 'Pure')?.probability || 0;
+    
+    // Safety Valve: If ANY single image is > 80% negative, flag the whole batch
+    if (negative > 0.8) isFlagged = true;
+    
+    badScoreSum += negative;
+    goodScoreSum += pure;
+  });
 
-## 4️⃣ AUTHENTICATION
+  const avgBad = badScoreSum / results.length;
+  const avgGood = goodScoreSum / results.length;
 
-### Farmer (Optional)
+  // 3. Final Determination
+  let status: 'good' | 'bad';
+  let emoji: string;
+  let message: string;
 
-* Phone + OTP
-* Google Login
-* Email + Password
+  if (isFlagged || avgBad > avgGood) {
+    status = 'bad';
+    emoji = '😟';
+    message = "These seeds show signs of impurity or damage. We recommend reporting this batch.";
+  } else {
+    status = 'good';
+    emoji = '😊';
+    message = "Great news! These seeds look pure and healthy based on our visual analysis.";
+  }
 
-### Officer (Restricted)
-
-* Phone + OTP
-* Email + Password
-* No Google login
-
-Farmers can scan without login.
-Login required for dashboard, complaints, history.
-
----
-
-## 5️⃣ FARMER DASHBOARD
-
-* Scan history
-* Results
-* Complaint submission
-* Batch warnings
-
-### Complaint Types
-
-* No germination
-* Low germination
-* Suspected fake
-
-Complaints auto-link to batch.
-
----
-
-## 6️⃣ OFFICER DASHBOARD
-
-* Top 5 risky batches
-* Complaint count
-* Risk status:
-
-  * 🟢 Low
-  * 🟡 Medium
-  * 🔴 High
-
-Actions:
-
-* Inspect
-* Warn
-* Suspend
-
----
-
-## 7️⃣ BUSINESS LOGIC
-
-### Risk Score
-
-```ts
-RiskScore=VisualDefectScore+(ComplaintCount*Weight)
+  return { status, emoji, message, rawData: results }; // Keep rawData for saving later
+}
 ```
 
-### Buckets
+---
 
-* 0–40: Low 🟢
-* 41–70: Medium 🟡
-* 71–100: High 🔴
+## 4. Auth & Complaint Flow (The "Hook")
+
+### Step 8-10: Just-In-Time Authentication
+**Trigger:** User clicks "File Complaint" on a Bad result.
+
+**Component:** `<PhoneAuthDrawer />` (Shadcn Drawer/Sheet, bottom aligned)
+1.  **Input:** Phone Number (+91 pre-filled).
+2.  **Provider:** Supabase Auth (OTP).
+3.  **Fallback:** "Or continue with Google / Email".
+4.  **Logic:**
+    - On successful login, check `auth.users` metadata.
+    - If `new_user`, show minimal profile form (Name, District).
+    - **CRITICAL:** Pass the temporary `guest_scan_id` or the `base64_images` to the next step so the user doesn't have to re-upload.
+
+### Step 11: Complaint Submission
+**Page:** `/farmer/complaint/new` (Protected)
+- **Auto-Fill:**
+  - Attach the images captured in Step 1.
+  - Set "Issue Type" to "Quality Check Failed".
+- **User Input:**
+  - Batch Number (Manual entry from packet).
+  - District/Location (Auto-detect button).
+- **Submit:** Saves to `product_complaints` and `packet_verifications` tables.
 
 ---
 
-## 8️⃣ AI IMPLEMENTATION (MVP)
+## 5. Navigation & Header Logic
 
-* Pretrained CNN / MobileNet
-* OR OpenCV:
+**Component:** `<SiteHeader />`
 
-  * Color histogram
-  * Shape variance
-  * Texture irregularity
+**Logic:**
+```tsx
+// Server Component
+const session = await supabase.auth.getSession();
 
-Dataset:
-
-* Public seed images
-* Labeled: good / suspicious
-
-No training from scratch.
-No heavy GPU.
-Fast inference only.
-
----
-
-## 9️⃣ TECH STACK
-
-### Frontend
-
-* Next.js (App Router)
-* Tailwind CSS
-* Camera API
-* Emoji-based UI
-
-### Backend
-
-* Node.js API routes
-* Vision API integration
-* Simple scoring logic
-
-### Database
-
-* Supabase / PostgreSQL
-* Tables:
-
-  * seed_batches
-  * seed_images
-  * complaints
-  * risk_scores
-  * users
-
----
-
-## 🔟 UI RULES
-
-* Minimal text
-* Large buttons
-* High contrast
-* Emoji-first
-* No charts for farmers
-* Charts/tables allowed for officers
-
----
-
-## 1️⃣1️⃣ DEMO FLOW
-
-1. Open website
-2. Take seed photo
-3. Fake-looking seed → 🔴 Bad Seed
-4. Submit complaint
-5. Officer dashboard updates
-6. Batch turns 🔴 High Risk
-
----
-
-## 1️⃣2️⃣ OUTPUT EXPECTATIONS
-
-* Complete components
-* Working API routes
-* Clean Tailwind UI
-* Minimal placeholders
-* Readable logic
-* No unnecessary abstractions
-
----
-
-## ONE-LINE PRODUCT SUMMARY
-
-A camera-first AI platform that helps farmers detect risky seed batches before sowing and enables preventive agricultural governance.
-
+return (
+  <header className="h-16 border-b border-border bg-white px-4 flex items-center justify-between">
+    <Logo />
+    
+    {session ? (
+      <div className="flex items-center gap-3">
+        <Link href="/farmer/dashboard">Dashboard</Link>
+        <UserAvatar />
+      </div>
+    ) : (
+      // On root page, hide Login/Signup (let Camera be focus)
+      // On /about page, show Login/Signup
+      isRootPage ? (
+        <Link href="/about" className="text-sm underline">About Us</Link>
+      ) : (
+        <div className="flex gap-2">
+           <Button variant="outline">Login</Button>
+           <Button>Signup</Button>
+        </div>
+      )
+    )}
+  </header>
+)
 ```
-```
+
+---
+
+## 6. Implementation Checklist
+
+1.  [ ] **Page Architecture:** Rename old `page.tsx` to `about/page.tsx`. Create new `page.tsx` with Camera logic.
+2.  [ ] **Camera Component:** Implement multi-image capture and state.
+3.  [ ] **Server Action:** Implement `processGuestImages` with the aggregation logic described above.
+4.  [ ] **Auth:** Configure Supabase Phone Auth (or mock if keys unavailable) and build the `<PhoneAuthDrawer />`.
+5.  [ ] **State Handoff:** Ensure images survive the login process (use `localStorage` or React Context to hold scan data during auth).
+6.  [ ] **Styling:** Verify `rounded-none` and Dark Green theme on all new mobile components.
+
+--- END OF FILE mobile.flow.agent.md ---

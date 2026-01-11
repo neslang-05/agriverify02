@@ -7,10 +7,44 @@ import {
   BatchRiskRegistry,
 } from '@/types/complaints';
 import { revalidatePath } from 'next/cache';
+import { DEMO_COMPLAINTS, DEMO_BATCH_REGISTRY, DEMO_COMPLAINT_STATS } from '@/lib/demo-data';
+import { getCurrentUser } from './auth';
 
 export async function submitComplaint(
   data: ComplaintSubmission
 ): Promise<{ success: boolean; error?: string; complaint?: ProductComplaint }> {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    // In demo mode, simulate complaint submission
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const newComplaint: ProductComplaint = {
+      id: `demo-${Date.now()}`,
+      user_id: currentUser.id,
+      verification_id: data.verificationId,
+      batch_number: data.batchNumber,
+      brand_name: data.brandName,
+      crop_type: data.cropType,
+      district: data.district,
+      issue_type: data.issueType,
+      description: data.description,
+      days_since_sowing: data.daysSinceSowing,
+      severity_score: data.severityScore,
+      field_image_url: data.fieldImageUrl,
+      status: 'open',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // In demo mode, we don't save to DB, just return success
+    revalidatePath('/farmer/complaints');
+    return { success: true, complaint: newComplaint };
+  }
+
   try {
     const supabase = await createClient();
 
@@ -79,6 +113,16 @@ export async function submitComplaint(
 }
 
 export async function getUserComplaints(): Promise<ProductComplaint[]> {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    // Return demo complaints for the current demo user
+    const currentUser = await getCurrentUser();
+    if (!currentUser) return [];
+
+    return DEMO_COMPLAINTS.filter(complaint => complaint.user_id === currentUser.id);
+  }
+
   try {
     const supabase = await createClient();
 
@@ -110,6 +154,12 @@ export async function getUserComplaints(): Promise<ProductComplaint[]> {
 }
 
 export async function getHighRiskBatches(): Promise<BatchRiskRegistry[]> {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    return DEMO_BATCH_REGISTRY;
+  }
+
   try {
     const supabase = await createClient();
 
@@ -135,6 +185,12 @@ export async function getHighRiskBatches(): Promise<BatchRiskRegistry[]> {
 export async function getBatchComplaints(
   batchNumber: string
 ): Promise<ProductComplaint[]> {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    return DEMO_COMPLAINTS.filter(complaint => complaint.batch_number === batchNumber);
+  }
+
   try {
     const supabase = await createClient();
 
@@ -203,6 +259,12 @@ export async function updateComplaintStatus(
 }
 
 export async function getComplaintStats() {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    return DEMO_COMPLAINT_STATS;
+  }
+
   try {
     const supabase = await createClient();
 

@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { DEMO_VERIFICATION_HISTORY } from "@/lib/demo-data";
+import { getCurrentUser } from "./auth";
 
 export interface VerificationHistoryItem {
   id: string;
@@ -15,6 +17,27 @@ export interface VerificationHistoryItem {
 }
 
 export async function getVerificationHistory(limit = 20) {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return {
+        success: false,
+        error: "Not authenticated"
+      };
+    }
+
+    const userHistory = DEMO_VERIFICATION_HISTORY.filter(item => item.user_id === currentUser.id)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, limit);
+
+    return {
+      success: true,
+      data: userHistory
+    };
+  }
+
   try {
     const supabase = await createClient();
     
@@ -65,6 +88,21 @@ export async function saveVerificationHistory(verificationData: {
   recommendation?: string;
   risk_factors?: string[];
 }) {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    // In demo mode, don't save to database
+    return {
+      success: true,
+      data: {
+        id: `demo-${Date.now()}`,
+        user_id: 'demo-user',
+        ...verificationData,
+        created_at: new Date().toISOString()
+      }
+    };
+  }
+
   try {
     const supabase = await createClient();
     
@@ -147,6 +185,13 @@ export async function deleteVerificationHistoryItem(id: string) {
 }
 
 export async function getUserVerifications() {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    // In demo mode, return empty array for now
+    return [];
+  }
+
   try {
     const supabase = await createClient();
     
