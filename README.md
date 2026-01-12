@@ -66,6 +66,10 @@ AZURE_OPENAI_ENDPOINT=your-openai-endpoint
 AZURE_OPENAI_API_KEY=your-openai-key
 AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
 ENABLE_AZURE_OPENAI_CHAT=true
+
+# Azure OpenAI (for AI Summary/Synthesis - gpt-5-mini)
+AZURE_OPENAI_DEPLOYMENT_NAME=gpt-5-mini
+AZURE_OPENAI_API_VERSION=2024-02-15-preview
 ```
 
 ### Azure Setup Instructions
@@ -84,6 +88,8 @@ ENABLE_AZURE_OPENAI_CHAT=true
 - Create an OpenAI resource
 - Deploy a GPT model (e.g., gpt-4o-mini)
 - Copy the endpoint, key, and deployment name
+
+**Note:** The AI Summary feature uses a separate deployment (gpt-5-mini) for synthesizing verification results into human-friendly language. See [AI Summary Integration Guide](docs/AI_SUMMARY_INTEGRATION.md) for details.
 
 ### Running the Application
 

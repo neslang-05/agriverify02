@@ -2,20 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CameraScanner, ProcessingOverlay, GuestResultCard, PhoneAuthDrawer } from '@/components/scanner';
-import { processGuestImages } from '@/app/actions/guest-verification';
+import { CameraScanner, ProcessingOverlay, PhoneAuthDrawer } from '@/components/scanner';
+import { AISummaryCard } from '@/components/scanner/ai-summary-card';
+import { processSeedImageWithAI } from '@/app/actions/guest-verification';
+import type { VerificationWithAISummary } from '@/types/packet-verification';
 
 // Storage key for persisting scan data across auth
 const SCAN_DATA_KEY = 'agriverify_guest_scan';
-
-interface ScanResult {
-  status: 'good' | 'bad';
-  emoji: string;
-  message: string;
-  avgGood: number;
-  avgBad: number;
-  isFlagged: boolean;
-}
 
 type ViewState = 'camera' | 'processing' | 'result';
 
@@ -23,7 +16,7 @@ export function ScannerFlow() {
   const router = useRouter();
   const [viewState, setViewState] = useState<ViewState>('camera');
   const [images, setImages] = useState<string[]>([]);
-  const [result, setResult] = useState<ScanResult | null>(null);
+  const [result, setResult] = useState<VerificationWithAISummary | null>(null);
   const [showAuthDrawer, setShowAuthDrawer] = useState(false);
 
   // Handle image capture
@@ -38,7 +31,8 @@ export function ScannerFlow() {
     setViewState('processing');
 
     try {
-      const analysisResult = await processGuestImages(images);
+      // Use the first image for AI analysis
+      const analysisResult = await processSeedImageWithAI(images[0]);
       setResult(analysisResult);
       
       // Store scan data for potential complaint flow
@@ -52,12 +46,18 @@ export function ScannerFlow() {
     } catch (error) {
       console.error('Analysis error:', error);
       setResult({
-        status: 'bad',
-        emoji: '⚠️',
-        message: 'Analysis failed. Please try again.',
-        avgGood: 0,
-        avgBad: 0,
-        isFlagged: false
+        ui: {
+          status: 'bad',
+          emoji: '⚠️',
+          title: 'Analysis Failed',
+          message: 'We could not analyze the image. Please try again with a clear photo.',
+          action: 'Try scanning again or contact support.'
+        },
+        technical: {
+          predictions: [],
+          model_confidence: 0,
+          raw_tags: []
+        }
       });
       setViewState('result');
     }
@@ -92,9 +92,13 @@ export function ScannerFlow() {
         // Only restore if data is less than 30 minutes old
         if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
           setImages(parsed.images || []);
-          if (parsed.result) {
+          // Validate that result has the correct structure (ui and technical properties)
+          if (parsed.result && parsed.result.ui && parsed.result.technical) {
             setResult(parsed.result);
             setViewState('result');
+          } else {
+            // Old format or invalid data, clear it
+            localStorage.removeItem(SCAN_DATA_KEY);
           }
         } else {
           localStorage.removeItem(SCAN_DATA_KEY);
@@ -121,11 +125,13 @@ export function ScannerFlow() {
 
       {/* Result View */}
       {viewState === 'result' && result && (
-        <GuestResultCard
+        <AISummaryCard
           result={result}
+          isGuest={true}
           images={images}
           onReset={handleReset}
           onFileComplaint={handleFileComplaint}
+          onLogin={() => router.push('/login')}
         />
       )}
 
