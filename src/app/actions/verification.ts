@@ -7,6 +7,8 @@ import { AGRICULTURAL_KNOWLEDGE_BASE } from '@/lib/knowledge-base';
 import { classifyWithFallback } from '@/lib/azure/custom-vision-fallback';
 import { performOCR, OCRResult } from '@/lib/azure/computer-vision-ocr';
 import { saveVerificationHistory } from './history';
+import { interpreter } from '@/lib/openai/interpreter';
+import type { VerificationWithAISummary } from '@/types/packet-verification';
 
 interface VisionAIResult {
   tag: string;
@@ -305,6 +307,154 @@ export async function uploadAndVerify(formData: FormData): Promise<HybridVerific
   };
 
   return result;
+}
+
+/**
+ * Verify image with AI-powered human-friendly summary
+ * Uses Azure Custom Vision + Azure OpenAI for synthesis
+ */
+export async function uploadAndVerifyWithAI(formData: FormData): Promise<VerificationWithAISummary> {
+  const file = formData.get('image') as File;
+
+  try {
+    if (!file) {
+      throw new Error('No image file provided');
+    }
+
+    // Convert file to buffer and base64
+    const arrayBuffer = await file.arrayBuffer();
+    const imageBuffer = Buffer.from(arrayBuffer);
+    const base64Image = `data:${file.type};base64,${imageBuffer.toString('base64')}`;
+
+    // Check if Azure Custom Vision is configured
+    const isAzureConfigured = process.env.AZURE_CUSTOM_VISION_PREDICTION_KEY && 
+                              process.env.AZURE_CUSTOM_VISION_ENDPOINT;
+
+    if (!isAzureConfigured) {
+      throw new Error('Azure Custom Vision not configured');
+    }
+
+    // 1. Run Custom Vision classification
+    const visionResult = await classifyWithFallback(imageBuffer, base64Image);
+
+    // 2. Run OpenAI synthesis for human-friendly interpretation
+    let simplified;
+    try {
+      simplified = await interpreter.synthesizeResult(base64Image, visionResult.predictions);
+      
+      // Check if it's actually a seed image
+      if (!simplified.is_seed_image) {
+        // Return error for non-seed images
+        return {
+          ui: {
+            status: 'bad',
+            emoji: '❌',
+            title: simplified.headline || 'Not a Seed Image',
+            message: simplified.explanation,
+            action: simplified.action_recommendation
+          },
+          technical: {
+            predictions: [],
+            model_confidence: 0,
+            raw_tags: []
+          }
+        };
+      }
+    } catch (error) {
+      console.error('OpenAI synthesis failed, using fallback:', error);
+      // Fallback to rule-based interpretation
+      simplified = getFallbackInterpretation(visionResult.predictions);
+    }
+
+    // 3. Return combined result
+    const result: VerificationWithAISummary = {
+      ui: {
+        status: simplified.status,
+        emoji: simplified.emoji,
+        title: simplified.headline,
+        message: simplified.explanation,
+        action: simplified.action_recommendation
+      },
+      technical: {
+        predictions: visionResult.predictions,
+        model_confidence: visionResult.topPrediction.confidence,
+        raw_tags: visionResult.predictions
+      }
+    };
+
+    // Save to history (non-blocking)
+    saveVerificationHistory({
+      image_url: base64Image,
+      status: simplified.status === 'good' ? 'genuine' : simplified.status === 'bad' ? 'fake' : 'suspicious',
+      confidence: visionResult.topPrediction.confidence / 100,
+      vision_ai_tag: visionResult.topPrediction.tag,
+      vision_ai_confidence: visionResult.topPrediction.confidence / 100,
+      recommendation: simplified.explanation,
+      risk_factors: simplified.status !== 'good' ? [simplified.action_recommendation] : undefined
+    }).catch(err => console.error('Failed to save history:', err));
+
+    return result;
+
+  } catch (error) {
+    console.error('AI verification error:', error);
+    
+    // Return fallback result
+    return {
+      ui: {
+        status: 'bad',
+        emoji: '⚠️',
+        title: 'Analysis Unavailable',
+        message: "We couldn't analyze the image at this time. Please ensure you have a clear photo and try again.",
+        action: "Try again or contact support if the issue persists."
+      },
+      technical: {
+        predictions: [],
+        model_confidence: 0,
+        raw_tags: []
+      }
+    };
+  }
+}
+
+/**
+ * Fallback interpretation when OpenAI is unavailable
+ */
+function getFallbackInterpretation(predictions: Array<{ tagName: string; probability: number }>) {
+  const top = [...predictions].sort((a, b) => b.probability - a.probability)[0];
+  const isPure = top.tagName.toLowerCase().includes('pure') || 
+                 top.tagName.toLowerCase().includes('genuine') ||
+                 top.tagName.toLowerCase().includes('authentic');
+  const isGood = isPure && top.probability > 0.6;
+  const isAverage = top.probability > 0.4 && top.probability <= 0.6;
+  
+  if (isGood) {
+    return {
+      status: 'good' as const,
+      emoji: '🟢',
+      headline: 'Quality Looks Good',
+      explanation: "The seeds appear uniform and healthy. This batch shows high purity with minimal impurities.",
+      action_recommendation: "Safe to use for planting.",
+      is_seed_image: true
+    };
+  } else if (isAverage) {
+    return {
+      status: 'average' as const,
+      emoji: '🟡',
+      headline: 'Quality Needs Attention',
+      explanation: "We detected some impurities or broken seeds in this sample. The quality is acceptable but not optimal.",
+      action_recommendation: "Consider cleaning the seeds before use.",
+      is_seed_image: true
+    };
+  } else {
+    return {
+      status: 'bad' as const,
+      emoji: '🔴',
+      headline: 'Quality Concerns Detected',
+      explanation: "We detected significant impurities or broken seeds in this sample. This may affect crop yield.",
+      action_recommendation: "Consider filing a complaint or requesting replacement from your dealer.",
+      is_seed_image: true
+    };
+  }
 }
 
 export async function getSeedRecommendations(

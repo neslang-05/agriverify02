@@ -167,3 +167,30 @@ export interface CrossReferenceResult {
   score: number; // 0-100
   flags: string[];
 }
+
+// AI Summary Types (OpenAI Synthesis)
+
+export interface SimplifiedAnalysis {
+  status: 'good' | 'average' | 'bad';
+  emoji: string;
+  headline: string; // 3-5 words
+  explanation: string; // 2 sentences max, simple language
+  action_recommendation: string; // "Plant this", "Clean it", "Report it"
+}
+
+export interface VerificationWithAISummary {
+  // Simplified view for UI (Guest and Farmer)
+  ui: {
+    status: 'good' | 'average' | 'bad';
+    emoji: string;
+    title: string;
+    message: string;
+    action: string;
+  };
+  // Full technical data for detailed view / Officer Dashboard / Database
+  technical: {
+    predictions: Array<{ tagName: string; probability: number }>;
+    model_confidence: number;
+    raw_tags: Array<{ tagName: string; probability: number }>;
+  };
+}

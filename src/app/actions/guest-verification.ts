@@ -1,6 +1,8 @@
 'use server';
 
 import { customVisionService } from '@/lib/azure/custom-vision';
+import { interpreter } from '@/lib/openai/interpreter';
+import type { VerificationWithAISummary } from '@/types/packet-verification';
 
 interface Prediction {
   tagName: string;
@@ -146,4 +148,129 @@ export async function storeGuestScanData(
   // For now, we rely on localStorage on the client side
   
   return scanId;
+}
+
+/**
+ * Process single seed image with AI-powered synthesis
+ * Uses Azure Custom Vision for technical analysis + Azure OpenAI for human-friendly interpretation
+ */
+export async function processSeedImageWithAI(
+  base64Image: string
+): Promise<VerificationWithAISummary> {
+  try {
+    // 1. Get Image Buffer
+    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // 2. Run Custom Vision (The "Hard" Data)
+    const visionResult = await customVisionService.classifyImage(buffer);
+
+    // 3. Run OpenAI Synthesis (The "Soft" Interpretation)
+    // Pass both the visual and the data for context
+    let simplified;
+    try {
+      simplified = await interpreter.synthesizeResult(base64Image, visionResult.predictions);
+      
+      // Check if it's actually a seed image
+      if (!simplified.is_seed_image) {
+        // Return error for non-seed images
+        return {
+          ui: {
+            status: 'bad',
+            emoji: '❌',
+            title: simplified.headline || 'Not a Seed Image',
+            message: simplified.explanation,
+            action: simplified.action_recommendation
+          },
+          technical: {
+            predictions: [],
+            model_confidence: 0,
+            raw_tags: []
+          }
+        };
+      }
+    } catch (error) {
+      console.error('OpenAI synthesis failed, using fallback:', error);
+      // Fallback to rule-based interpretation
+      simplified = getFallbackInterpretation(visionResult.predictions);
+    }
+
+    // 4. Return Combined Object
+    return {
+      // Simplified view for the UI Card
+      ui: {
+        status: simplified.status,
+        emoji: simplified.emoji,
+        title: simplified.headline,
+        message: simplified.explanation,
+        action: simplified.action_recommendation
+      },
+      // Full technical data for detailed view / Officer Dashboard / Database
+      technical: {
+        predictions: visionResult.predictions,
+        model_confidence: visionResult.topPrediction.confidence,
+        raw_tags: visionResult.predictions
+      }
+    };
+
+  } catch (error) {
+    console.error('AI verification error:', error);
+    
+    // Return a safe fallback result
+    return {
+      ui: {
+        status: 'bad',
+        emoji: '⚠️',
+        title: 'Analysis Unavailable',
+        message: "We couldn't analyze the image at this time. Please ensure you have a clear photo and try again.",
+        action: "Try again or contact support if the issue persists."
+      },
+      technical: {
+        predictions: [],
+        model_confidence: 0,
+        raw_tags: []
+      }
+    };
+  }
+}
+
+/**
+ * Fallback interpretation when OpenAI is unavailable
+ */
+function getFallbackInterpretation(predictions: Prediction[]) {
+  const top = [...predictions].sort((a, b) => b.probability - a.probability)[0];
+  const isPure = top.tagName.toLowerCase().includes('pure') || 
+                 top.tagName.toLowerCase().includes('genuine') ||
+                 top.tagName.toLowerCase().includes('authentic');
+  const isGood = isPure && top.probability > 0.6;
+  const isAverage = top.probability > 0.4 && top.probability <= 0.6;
+  
+  if (isGood) {
+    return {
+      status: 'good' as const,
+      emoji: '🟢',
+      headline: 'Quality Looks Good',
+      explanation: "The seeds appear uniform and healthy. This batch shows high purity with minimal impurities.",
+      action_recommendation: "Safe to use for planting.",
+      is_seed_image: true
+    };
+  } else if (isAverage) {
+    return {
+      status: 'average' as const,
+      emoji: '🟡',
+      headline: 'Quality Needs Attention',
+      explanation: "We detected some impurities or broken seeds in this sample. The quality is acceptable but not optimal.",
+      action_recommendation: "Consider cleaning the seeds before use.",
+      is_seed_image: true
+    };
+  } else {
+    return {
+      status: 'bad' as const,
+      emoji: '🔴',
+      headline: 'Quality Concerns Detected',
+      explanation: "We detected significant impurities or broken seeds in this sample. This may affect crop yield.",
+      action_recommendation: "Consider filing a complaint or requesting replacement from your dealer.",
+      is_seed_image: true
+    };
+  }
 }
