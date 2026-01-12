@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Message {
   id: string;
@@ -69,7 +68,7 @@ export function ChatInterface({ onSendMessage, initialMessages = [] }: ChatInter
   };
 
   return (
-    <div className="flex flex-col h-[600px] bg-white shadow-md">
+    <div className="flex flex-col h-[600px] max-h-[70vh] bg-white shadow-md overflow-hidden">
       <div className="border-b border-neutral-200 p-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 flex items-center justify-center bg-emerald-100">
@@ -82,7 +81,7 @@ export function ChatInterface({ onSendMessage, initialMessages = [] }: ChatInter
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto p-4" ref={scrollRef}>
         <div className="space-y-4">
           {messages.length === 0 && (
             <motion.div
@@ -92,7 +91,7 @@ export function ChatInterface({ onSendMessage, initialMessages = [] }: ChatInter
             >
               <Bot className="h-12 w-12 mx-auto text-neutral-300 mb-4" />
               <p className="text-neutral-500">
-                Hello! I'm your AI agricultural assistant powered by advanced language models. I have extensive knowledge about farming practices, seed verification, crop recommendations, and agricultural best practices. Ask me anything about agriculture!
+                Ask me anything about seeds, farming, or crop recommendations. I'll give you clear, actionable answers.
               </p>
             </motion.div>
           )}
@@ -118,13 +117,13 @@ export function ChatInterface({ onSendMessage, initialMessages = [] }: ChatInter
                 )}
               </div>
               <div
-                className={`max-w-[80%] p-3 ${
+                className={`max-w-[80%] p-3 break-words overflow-hidden ${
                   message.role === 'user'
                     ? 'bg-emerald-800 text-white'
                     : 'bg-neutral-100 text-neutral-900'
                 }`}
               >
-                <p className="text-sm leading-relaxed">{message.content}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
                 <p
                   className={`text-xs mt-1 ${
                     message.role === 'user' ? 'text-emerald-200' : 'text-neutral-400'
@@ -153,7 +152,7 @@ export function ChatInterface({ onSendMessage, initialMessages = [] }: ChatInter
             </motion.div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       <form onSubmit={handleSubmit} className="border-t border-neutral-200 p-4">
         <div className="flex gap-2">

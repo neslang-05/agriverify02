@@ -334,19 +334,17 @@ export async function getChatResponse(message: string, userId: string): Promise<
     const client = getOpenAIClient();
     const deployment = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o-mini';
 
-    const systemPrompt = `You are an agricultural assistant specializing in seed verification, farming practices, and crop recommendations. You have access to the following knowledge base:
+    const systemPrompt = `You are a direct, knowledgeable agricultural assistant. Use this knowledge base:
 
 ${AGRICULTURAL_KNOWLEDGE_BASE}
 
-Instructions:
-- Provide helpful, accurate information based on the knowledge base
-- Be friendly and professional
-- If asked about seed verification, guide users to use the verification system
-- For crop recommendations, suggest certified varieties and best practices
-- Always emphasize buying from authorized dealers and checking certifications
-- If you don't have specific information, suggest consulting local agricultural experts
-- Keep responses concise but informative
-- Use simple language that farmers can understand`;
+CRITICAL RULES:
+- Keep every response to 2-3 sentences maximum
+- Give definitive answers, NOT "maybe" or "possibly" responses
+- Use simple, clear language farmers can immediately understand and act on
+- Be specific with numbers, varieties, and recommendations
+- Focus on actionable advice only
+- No long explanations - be direct and concise`;
 
     const response = await client.chat.completions.create({
       model: deployment,
@@ -354,7 +352,7 @@ Instructions:
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
       ],
-      max_completion_tokens: 500,
+      max_completion_tokens: 150,
     });
 
     return response.choices[0]?.message?.content || 'I apologize, but I encountered an error. Please try again.';
@@ -369,28 +367,28 @@ function getFallbackResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
 
   if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-    return "Hello! I'm your agricultural assistant. I can help you with seed verification, farming recommendations, and general agricultural queries. How can I assist you today?";
+    return "Hello! I help with seed verification and farming advice. What do you need help with?";
   }
 
   if (lowerMessage.includes('fake') || lowerMessage.includes('counterfeit')) {
-    return 'Counterfeit seeds are a serious concern. To protect yourself: 1) Always buy from authorized dealers with proper licenses. 2) Check for hologram stickers and QR codes on packaging. 3) Verify batch numbers with the manufacturer. 4) Report suspicious products to your local agricultural office. Would you like me to help you verify a specific product?';
+    return 'Buy only from authorized dealers with proper licenses. Check for hologram stickers, QR codes, and verify batch numbers with manufacturers.';
   }
 
   if (lowerMessage.includes('recommend') || lowerMessage.includes('best seed')) {
-    return 'For the best seed recommendations, I suggest visiting the Recommendations section where you can filter by crop type and district. The recommendations are based on government-certified varieties that have been tested for your region. Would you like me to explain more about any specific crop?';
+    return 'Visit the Recommendations section to filter by crop type and district. All recommendations are government-certified varieties tested for your region.';
   }
 
   if (lowerMessage.includes('verify') || lowerMessage.includes('check')) {
-    return 'To verify a seed or fertilizer product: 1) Go to the Verify section. 2) Upload a clear photo of the product label. 3) Select your crop type and district. 4) Our system will analyze the image and provide a verification result. The process takes about 2-3 seconds. Would you like to start a verification now?';
+    return 'Go to the Verify section, upload a clear photo of the product label, and select your crop type. Results in 2-3 seconds.';
   }
 
   if (lowerMessage.includes('rice') || lowerMessage.includes('paddy')) {
-    return 'For rice cultivation, I recommend certified varieties like BPT-5204 (Samba Mahsuri) or MTU-1010 depending on your region. These varieties have high yield potential and disease resistance. Make sure to check the seed certification tag and buy from authorized dealers. Need more specific recommendations for your district?';
+    return 'Top certified rice varieties: BPT-5204 (Samba Mahsuri) and MTU-1010. Both offer high yield and disease resistance. Always check the seed certification tag.';
   }
 
   if (lowerMessage.includes('fertilizer')) {
-    return 'When purchasing fertilizers: 1) Check for FCO (Fertilizer Control Order) license. 2) Verify the nutrient content matches the label. 3) Look for the batch number and manufacturing date. 4) Buy only sealed bags from authorized dealers. Counterfeit fertilizers can damage your crops and soil health.';
+    return 'Check for FCO license, verify nutrient content matches the label, and look for batch number and manufacturing date. Buy only sealed bags from authorized dealers.';
   }
 
-  return 'Thank you for your question. I can help you with: 1) Seed and fertilizer verification 2) Crop-specific recommendations 3) Identifying fake products 4) General farming guidance. Please feel free to ask about any of these topics, and I\'ll provide detailed information based on government guidelines and best agricultural practices.';
+  return 'I can help with seed verification, crop recommendations, identifying fake products, and farming guidance. What would you like to know?';
 }

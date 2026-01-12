@@ -202,7 +202,7 @@ export async function getUserVerifications() {
     }
 
     const { data, error } = await supabase
-      .from("packet_verifications")
+      .from("verification_history")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })

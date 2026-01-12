@@ -12,12 +12,16 @@ import { login } from '@/app/actions/auth';
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
+    setError(null);
     try {
       await login(formData);
+      // Success - will redirect
     } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
       setIsLoading(false);
     }
   };
@@ -46,6 +50,11 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 text-sm">
+                {error}
+              </div>
+            )}
             <form action={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -55,7 +64,7 @@ export default function LoginPage() {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="farmer@demo.com"
+                    placeholder="your@email.com"
                     required
                     className="rounded-none pl-10 border-2 focus:border-emerald-800 focus-visible:ring-0"
                     disabled={isLoading}
@@ -71,7 +80,7 @@ export default function LoginPage() {
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="Enter any password"
+                    placeholder="Enter your password"
                     required
                     className="rounded-none pl-10 border-2 focus:border-emerald-800 focus-visible:ring-0"
                     disabled={isLoading}
@@ -94,28 +103,6 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            <div className="mt-6 space-y-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-neutral-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-neutral-500">Demo Accounts</span>
-                </div>
-              </div>
-
-              <div className="grid gap-2 text-sm">
-                <div className="p-3 bg-neutral-50 border border-neutral-200">
-                  <p className="font-medium text-neutral-700">Farmer Account</p>
-                  <p className="text-neutral-500">farmer@demo.com</p>
-                </div>
-                <div className="p-3 bg-neutral-50 border border-neutral-200">
-                  <p className="font-medium text-neutral-700">Officer Account</p>
-                  <p className="text-neutral-500">officer@demo.com</p>
-                </div>
-              </div>
-            </div>
 
             <p className="mt-6 text-center text-sm text-neutral-500">
               Don&apos;t have an account?{' '}

@@ -1,12 +1,65 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
-  // Demo mode - allow all routes without authentication
-  // In production, uncomment the updateSession call for Supabase auth
-  return NextResponse.next();
-  
-  // Uncomment for Supabase authentication:
-  // return await updateSession(request);
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          response = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Protected routes
+  const protectedPaths = ['/farmer', '/officer'];
+  const isProtectedPath = protectedPaths.some(path => 
+    request.nextUrl.pathname.startsWith(path)
+  );
+
+  // Redirect to login if accessing protected route without auth
+  if (isProtectedPath && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect to dashboard if accessing login/register while authenticated
+  if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    const url = request.nextUrl.clone();
+    url.pathname = profile?.role === 'officer' ? '/officer/dashboard' : '/farmer/dashboard';
+    return NextResponse.redirect(url);
+  }
+
+  return response;
 }
 
 export const config = {

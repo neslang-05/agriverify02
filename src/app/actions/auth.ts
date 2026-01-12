@@ -1,130 +1,126 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { UserRole } from '@/types';
-
-// Demo mode authentication (no actual Supabase calls)
-interface DemoUser {
-  id: string;
-  email: string;
-  role: UserRole;
-  district: string;
-  full_name: string;
-}
-
-const DEMO_USERS: Record<string, DemoUser> = {
-  'farmer@demo.com': {
-    id: '1',
-    email: 'farmer@demo.com',
-    role: 'farmer',
-    district: 'Hyderabad',
-    full_name: 'Demo Farmer',
-  },
-  'officer@demo.com': {
-    id: '2',
-    email: 'officer@demo.com',
-    role: 'officer',
-    district: 'Hyderabad',
-    full_name: 'Demo Officer',
-  },
-};
+import { createClient } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
 
 export async function login(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  // Demo mode - accept any password for demo users
-  const demoUser = DEMO_USERS[email.toLowerCase()];
-  
-  if (demoUser) {
-    const cookieStore = await cookies();
-    cookieStore.set('demo_user', JSON.stringify(demoUser), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 1 day
-    });
-
-    if (demoUser.role === 'farmer') {
-      redirect('/farmer/dashboard');
-    } else {
-      redirect('/officer/dashboard');
-    }
+  if (!email || !password) {
+    throw new Error('Email and password are required');
   }
 
-  // For non-demo users, create a temporary user
-  const role: UserRole = email.includes('officer') ? 'officer' : 'farmer';
-  const tempUser: DemoUser = {
-    id: crypto.randomUUID(),
-    email,
-    role,
-    district: 'Hyderabad',
-    full_name: email.split('@')[0],
-  };
+  const supabase = await createClient();
 
-  const cookieStore = await cookies();
-  cookieStore.set('demo_user', JSON.stringify(tempUser), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24,
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
   });
 
-  if (role === 'farmer') {
-    redirect('/farmer/dashboard');
-  } else {
-    redirect('/officer/dashboard');
+  if (error) {
+    throw new Error(error.message || 'Invalid email or password');
+  }
+
+  // Get user profile to determine role
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    revalidatePath('/', 'layout');
+    
+    if (profile?.role === 'officer') {
+      redirect('/officer/dashboard');
+    } else {
+      redirect('/farmer/dashboard');
+    }
   }
 }
 
 export async function register(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const role = formData.get('role') as UserRole;
-  const district = formData.get('district') as string;
+  const role = formData.get('role') as string || 'farmer';
   const fullName = formData.get('fullName') as string;
 
-  const newUser: DemoUser = {
-    id: crypto.randomUUID(),
-    email,
-    role,
-    district,
-    full_name: fullName,
-  };
+  if (!email || !password || !role || !fullName) {
+    throw new Error('All fields are required');
+  }
 
-  const cookieStore = await cookies();
-  cookieStore.set('demo_user', JSON.stringify(newUser), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24,
+  if (password.length < 6) {
+    throw new Error('Password must be at least 6 characters');
+  }
+
+  const supabase = await createClient();
+
+  // Sign up the user
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        role: role,
+      },
+    },
   });
 
-  if (role === 'farmer') {
-    redirect('/farmer/dashboard');
-  } else {
-    redirect('/officer/dashboard');
+  if (error) {
+    throw new Error(error.message || 'Registration failed');
+  }
+
+  if (data.user) {
+    // Create profile in profiles table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: data.user.id,
+        email: email,
+        full_name: fullName,
+        role: role,
+        district: 'Not specified',
+      });
+
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
+    }
+
+    revalidatePath('/', 'layout');
+
+    if (role === 'officer') {
+      redirect('/officer/dashboard');
+    } else {
+      redirect('/farmer/dashboard');
+    }
   }
 }
 
 export async function logout() {
-  const cookieStore = await cookies();
-  cookieStore.delete('demo_user');
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath('/', 'layout');
   redirect('/login');
 }
 
-export async function getCurrentUser(): Promise<DemoUser | null> {
-  const cookieStore = await cookies();
-  const userCookie = cookieStore.get('demo_user');
-
-  if (!userCookie) {
+export async function getCurrentUser() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
     return null;
   }
 
-  try {
-    return JSON.parse(userCookie.value) as DemoUser;
-  } catch {
-    return null;
-  }
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  return profile;
 }

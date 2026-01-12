@@ -23,12 +23,20 @@ CREATE TABLE IF NOT EXISTS verification_history (
     seed_variety TEXT,
     
     -- Additional metadata
-    recommendation TEXT,
-    risk_factors JSONB DEFAULT '[]'::jsonb,
-    
-    -- Indexes for common queries
-    CONSTRAINT verification_history_user_id_idx FOREIGN KEY (user_id) REFERENCES auth.users(id)
+    recommendation TEXT
 );
+
+-- Add risk_factors column if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'verification_history' 
+        AND column_name = 'risk_factors'
+    ) THEN
+        ALTER TABLE verification_history ADD COLUMN risk_factors JSONB DEFAULT '[]'::jsonb;
+    END IF;
+END $$;
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_verification_history_user_id ON verification_history(user_id);
@@ -39,26 +47,26 @@ CREATE INDEX IF NOT EXISTS idx_verification_history_user_created ON verification
 -- Enable Row Level Security
 ALTER TABLE verification_history ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
--- Users can only view their own verification history
+-- RLS Policies (use DROP IF EXISTS to avoid conflicts)
+DROP POLICY IF EXISTS "Users can view own verification history" ON verification_history;
 CREATE POLICY "Users can view own verification history"
     ON verification_history
     FOR SELECT
     USING (auth.uid() = user_id);
 
--- Users can only insert their own verification history
+DROP POLICY IF EXISTS "Users can insert own verification history" ON verification_history;
 CREATE POLICY "Users can insert own verification history"
     ON verification_history
     FOR INSERT
     WITH CHECK (auth.uid() = user_id);
 
--- Users can only update their own verification history
+DROP POLICY IF EXISTS "Users can update own verification history" ON verification_history;
 CREATE POLICY "Users can update own verification history"
     ON verification_history
     FOR UPDATE
     USING (auth.uid() = user_id);
 
--- Users can only delete their own verification history
+DROP POLICY IF EXISTS "Users can delete own verification history" ON verification_history;
 CREATE POLICY "Users can delete own verification history"
     ON verification_history
     FOR DELETE
@@ -73,20 +81,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_verification_history_updated_at ON verification_history;
 CREATE TRIGGER trigger_verification_history_updated_at
     BEFORE UPDATE ON verification_history
     FOR EACH ROW
     EXECUTE FUNCTION update_verification_history_updated_at();
-
--- Add comments for documentation
-COMMENT ON TABLE verification_history IS 'Stores farmer seed quality verification history with AI classification results';
-COMMENT ON COLUMN verification_history.id IS 'Primary key UUID';
-COMMENT ON COLUMN verification_history.user_id IS 'Reference to the farmer who performed the verification';
-COMMENT ON COLUMN verification_history.image_url IS 'URL or path to the uploaded seed image';
-COMMENT ON COLUMN verification_history.status IS 'Overall verification status: genuine, fake, or suspicious';
-COMMENT ON COLUMN verification_history.confidence IS 'Overall confidence score (0-1)';
-COMMENT ON COLUMN verification_history.vision_ai_tag IS 'Azure Custom Vision classification tag (Pure/Negative)';
-COMMENT ON COLUMN verification_history.vision_ai_confidence IS 'Azure Custom Vision confidence score (0-1)';
-COMMENT ON COLUMN verification_history.seed_variety IS 'Detected seed variety from AI analysis';
-COMMENT ON COLUMN verification_history.recommendation IS 'Generated recommendation based on verification results';
-COMMENT ON COLUMN verification_history.risk_factors IS 'Array of detected risk factors stored as JSONB';

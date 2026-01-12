@@ -22,20 +22,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { register } from '@/app/actions/auth';
-import { DISTRICTS } from '@/types';
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<string>('farmer');
-  const [district, setDistrict] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
+    setError(null);
     formData.set('role', role);
-    formData.set('district', district);
     try {
       await register(formData);
+      // Success - will redirect
     } catch (error) {
+      setError(error instanceof Error ? error.message : 'Registration failed. Please try again.');
       setIsLoading(false);
     }
   };
@@ -66,6 +67,11 @@ export default function RegisterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 text-sm">
+                {error}
+              </div>
+            )}
             <form action={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name</Label>
@@ -107,8 +113,9 @@ export default function RegisterPage() {
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Create a password (min. 6 characters)"
                     required
+                    minLength={6}
                     className="rounded-none pl-10 border-2 focus:border-emerald-800 focus-visible:ring-0"
                     disabled={isLoading}
                   />
@@ -132,30 +139,10 @@ export default function RegisterPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>District</Label>
-                <Select
-                  value={district}
-                  onValueChange={setDistrict}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="rounded-none border-2 focus:border-emerald-800 focus:ring-0">
-                    <SelectValue placeholder="Select your district" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none max-h-48">
-                    {DISTRICTS.map((d) => (
-                      <SelectItem key={d} value={d} className="rounded-none">
-                        {d}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               <Button
                 type="submit"
                 className="w-full rounded-none bg-emerald-800 hover:bg-emerald-900"
-                disabled={isLoading || !district}
+                disabled={isLoading}
               >
                 {isLoading ? (
                   <>

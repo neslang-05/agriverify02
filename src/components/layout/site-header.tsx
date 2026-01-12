@@ -10,10 +10,19 @@ interface SiteHeaderProps {
 
 export async function SiteHeader({ isRootPage = false }: SiteHeaderProps) {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let profile = null;
+  if (user) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    profile = data;
+  }
 
-  const user = session?.user;
-  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  const userName = profile?.full_name || user?.email?.split('@')[0] || 'User';
   const initials = userName
     .split(' ')
     .map((n: string) => n[0])
@@ -34,7 +43,7 @@ export async function SiteHeader({ isRootPage = false }: SiteHeaderProps) {
       </Link>
 
       {/* Navigation */}
-      {session ? (
+      {user ? (
         // Logged in: Show Dashboard link and Avatar
         <div className="flex items-center gap-4 lg:gap-6">
           <Link 

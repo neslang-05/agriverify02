@@ -13,8 +13,8 @@ CREATE TABLE product_complaints (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   
-  -- Link to previous verification if available
-  verification_id UUID REFERENCES packet_verifications(id) ON DELETE SET NULL,
+  -- Link to previous verification if available (changed from packet_verifications to verification_history)
+  verification_id UUID REFERENCES verification_history(id) ON DELETE SET NULL,
   
   -- Core Data
   batch_number VARCHAR(100) NOT NULL,
