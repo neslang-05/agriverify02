@@ -3,6 +3,8 @@ import { ComplaintForm } from '@/components/complaints/complaint-form';
 import { getUserVerifications } from '@/app/actions/history';
 import { ScanDataHandler } from '@/components/complaints/scan-data-handler';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Report Complaint - Fake Seed Detection',
   description: 'Report quality issues with seed packets to help protect farmers',
