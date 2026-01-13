@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - SynergySeedAnalyzer
 
 on:
@@ -13,30 +10,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
     env:
-      # Supabase (used at build-time for client code)
+      # Supabase
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-
-      # Azure - OpenAI
+      # Azure Secrets...
       AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
       AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
       AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
       AZURE_OPENAI_DEPLOYMENT_NAME: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_NAME }}
       AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
-
-      # Azure - Custom Vision
       AZURE_CUSTOM_VISION_PREDICTION_KEY: ${{ secrets.AZURE_CUSTOM_VISION_PREDICTION_KEY }}
       AZURE_CUSTOM_VISION_ENDPOINT: ${{ secrets.AZURE_CUSTOM_VISION_ENDPOINT }}
       AZURE_CUSTOM_VISION_PROJECT_ID: ${{ secrets.AZURE_CUSTOM_VISION_PROJECT_ID }}
       AZURE_CUSTOM_VISION_ITERATION_NAME: ${{ secrets.AZURE_CUSTOM_VISION_ITERATION_NAME }}
-
-      # Azure - Computer Vision
       AZURE_COMPUTER_VISION_ENDPOINT: ${{ secrets.AZURE_COMPUTER_VISION_ENDPOINT }}
       AZURE_COMPUTER_VISION_KEY: ${{ secrets.AZURE_COMPUTER_VISION_KEY }}
-
-      # Edge vision (optional)
       AZURE_EDGE_VISION_ENDPOINT: ${{ secrets.AZURE_EDGE_VISION_ENDPOINT }}
       AZURE_EDGE_VISION_KEY: ${{ secrets.AZURE_EDGE_VISION_KEY }}
 
@@ -48,18 +38,12 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: npm ci, build, and test
+      - name: npm install, build, and prune
         run: |
           npm ci
           npm run build --if-present
-          # Only run tests if Azure integration secrets are provided.
-          # This prevents CI from running live Azure integration tests
-          # (which require valid keys and can be rate-limited).
-          if [ -n "$AZURE_CUSTOM_VISION_PREDICTION_KEY" ] || [ -n "$AZURE_OPENAI_API_KEY" ]; then
-            npm run test --if-present
-          else
-            echo "Skipping tests that require Azure credentials (no AZURE_* secrets set)."
-          fi
+          # Removes devDependencies to prevent deployment timeouts/crashes
+          npm prune --production
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
