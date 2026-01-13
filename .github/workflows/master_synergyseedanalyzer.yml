@@ -1,3 +1,6 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy Node.js app to Azure Web App - SynergySeedAnalyzer
 
 on:
@@ -15,7 +18,7 @@ jobs:
       # Supabase
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      # Azure Secrets...
+      # Azure Secrets
       AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
       AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
       AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
@@ -42,14 +45,20 @@ jobs:
         run: |
           npm ci
           npm run build --if-present
-          # Removes devDependencies to prevent deployment timeouts/crashes
+          # Remove devDependencies to keep the size small
           npm prune --production
+
+      - name: Zip artifact for deployment
+        run: |
+          # Manually zip the current directory to ensure .next is included
+          # We exclude .git and .github to save space
+          zip -r release.zip . -x ".git/*" ".github/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -67,5 +76,5 @@ jobs:
         with:
           app-name: 'SynergySeedAnalyzer'
           slot-name: 'Production'
-          package: .
+          package: release.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4CCE02EC390345ACADF6FDCC29D4AFB1 }}
