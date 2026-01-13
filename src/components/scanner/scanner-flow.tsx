@@ -116,7 +116,7 @@ export function ScannerFlow() {
         <CameraScanner
           onCapture={handleCapture}
           onAnalyze={handleAnalyze}
-          maxImages={5}
+          maxImages={1}
         />
       )}
 

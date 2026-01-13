@@ -25,7 +25,6 @@ export function AISummaryCard({
   onLogin
 }: AISummaryCardProps) {
   const [showTechnical, setShowTechnical] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Guard against undefined result or missing properties
   if (!result || !result.ui || !result.technical) {
@@ -65,18 +64,6 @@ export function AISummaryCard({
 
   const colors = statusColors[ui.status] || statusColors.bad;
   const isNotSeedImage = ui.title && ui.title.toLowerCase().includes('not a seed');
-
-  const nextImage = () => {
-    if (images.length > 0) {
-      setCurrentImageIndex((prev) => (prev + 1) % images.length);
-    }
-  };
-
-  const prevImage = () => {
-    if (images.length > 0) {
-      setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-    }
-  };
 
   // Render action buttons based on status
   const renderActionButtons = (isMobile = false) => {
@@ -177,41 +164,10 @@ export function AISummaryCard({
                 <div className="lg:hidden mb-6">
                   <div className="relative aspect-[4/3] bg-gray-900 rounded-xl overflow-hidden mx-auto max-w-sm">
                     <img
-                      src={images[currentImageIndex]}
-                      alt={`Uploaded seed image ${currentImageIndex + 1}`}
+                      src={images[0]}
+                      alt="Uploaded seed image"
                       className="w-full h-full object-contain"
                     />
-                    
-                    {/* Image Counter */}
-                    {images.length > 1 && (
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-full text-xs font-medium">
-                        {currentImageIndex + 1} / {images.length}
-                      </div>
-                    )}
-
-                    {/* Navigation Buttons */}
-                    {images.length > 1 && (
-                      <>
-                        <button
-                          onClick={prevImage}
-                          className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full transition-colors"
-                          aria-label="Previous image"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={nextImage}
-                          className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full transition-colors"
-                          aria-label="Next image"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      </>
-                    )}
                   </div>
                 </div>
               )}
@@ -296,41 +252,10 @@ export function AISummaryCard({
                 {/* Image Container */}
                 <div className="relative aspect-[4/3] bg-gray-900">
                   <img
-                    src={images[currentImageIndex]}
-                    alt={`Uploaded seed image ${currentImageIndex + 1}`}
+                    src={images[0]}
+                    alt="Uploaded seed image"
                     className="w-full h-full object-contain"
                   />
-                  
-                  {/* Image Counter */}
-                  {images.length > 1 && (
-                    <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {currentImageIndex + 1} / {images.length}
-                    </div>
-                  )}
-
-                  {/* Navigation Buttons */}
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        onClick={prevImage}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                        aria-label="Previous image"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={nextImage}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                        aria-label="Next image"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </>
-                  )}
                 </div>
               </div>
             </div>
