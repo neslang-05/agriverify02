@@ -1,42 +1,79 @@
-# Test Images for Azure Vision Integration
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
 
-This directory should contain test images for the Azure Custom Vision integration tests.
+name: Build and deploy Node.js app to Azure Web App - SynergySeedAnalyzer
 
-## Required Test Images
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
 
-Place the following test images in this directory:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+    env:
+      # Supabase (used at build-time for client code)
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-1. **genuine-seed.jpg** - Image of a genuine certified paddy seed packet
-   - Should have clear labeling
-   - Include certification marks
-   - High-quality packaging
+      # Azure - OpenAI
+      AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+      AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+      AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+      AZURE_OPENAI_DEPLOYMENT_NAME: ${{ secrets.AZURE_OPENAI_DEPLOYMENT_NAME }}
+      AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
 
-2. **fake-seed.jpg** - Image of a counterfeit seed packet
-   - Poor quality printing
-   - Missing certification marks
-   - Suspicious characteristics
+      # Azure - Custom Vision
+      AZURE_CUSTOM_VISION_PREDICTION_KEY: ${{ secrets.AZURE_CUSTOM_VISION_PREDICTION_KEY }}
+      AZURE_CUSTOM_VISION_ENDPOINT: ${{ secrets.AZURE_CUSTOM_VISION_ENDPOINT }}
+      AZURE_CUSTOM_VISION_PROJECT_ID: ${{ secrets.AZURE_CUSTOM_VISION_PROJECT_ID }}
+      AZURE_CUSTOM_VISION_ITERATION_NAME: ${{ secrets.AZURE_CUSTOM_VISION_ITERATION_NAME }}
 
-3. **suspicious-seed.jpg** (optional) - Image with ambiguous characteristics
-   - Partially visible labels
-   - Some missing information
-   - Moderate quality
+      # Azure - Computer Vision
+      AZURE_COMPUTER_VISION_ENDPOINT: ${{ secrets.AZURE_COMPUTER_VISION_ENDPOINT }}
+      AZURE_COMPUTER_VISION_KEY: ${{ secrets.AZURE_COMPUTER_VISION_KEY }}
 
-## Image Requirements
+      # Edge vision (optional)
+      AZURE_EDGE_VISION_ENDPOINT: ${{ secrets.AZURE_EDGE_VISION_ENDPOINT }}
+      AZURE_EDGE_VISION_KEY: ${{ secrets.AZURE_EDGE_VISION_KEY }}
 
-- **Format**: JPEG, PNG
-- **Size**: Maximum 4MB per image
-- **Resolution**: At least 256x256 pixels
-- **Quality**: Clear, well-lit images
+    steps:
+      - uses: actions/checkout@v4
 
-## Usage in Tests
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
 
-These images are used by `azure-vision.test.ts` to validate:
-- Classification accuracy
-- Confidence scores
-- Seed variety extraction
-- Authenticity detection
-- Performance benchmarks
+      - name: npm install and build
+        run: |
+          npm ci
+          npm run build --if-present
 
-## Note
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: .
 
-These test images are not included in version control. You must provide your own test images that match your Azure Custom Vision model's training data.
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+      
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'SynergySeedAnalyzer'
+          slot-name: 'Production'
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4CCE02EC390345ACADF6FDCC29D4AFB1 }}
