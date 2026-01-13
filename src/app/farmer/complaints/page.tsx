@@ -6,6 +6,8 @@ import { ComplaintCard } from '@/components/complaints/complaint-card';
 import { getUserComplaints } from '@/app/actions/complaints';
 import { Plus, AlertCircle } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'My Complaints - Fake Seed Detection',
   description: 'View and track your seed quality complaints',

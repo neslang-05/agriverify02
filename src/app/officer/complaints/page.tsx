@@ -7,6 +7,8 @@ import { RiskLevelBadge } from '@/components/complaints/risk-level-badge';
 import { getHighRiskBatches, getComplaintStats } from '@/app/actions/complaints';
 import { AlertTriangle, TrendingUp, MapPin } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Complaint Dashboard - Fake Seed Detection',
   description: 'Monitor and manage seed quality complaints from farmers',

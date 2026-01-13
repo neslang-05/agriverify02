@@ -153,7 +153,7 @@ Example output for non-seed image:
     if (isGood) {
       return {
         status: 'good',
-        emoji: '�',
+        emoji: '😊',
         headline: 'Good Quality Seeds',
         explanation: "These seeds look healthy and clean. You can use them for planting with confidence.",
         action_recommendation: "Plant these seeds. They look ready to grow!",

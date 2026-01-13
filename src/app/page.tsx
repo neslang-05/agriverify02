@@ -3,6 +3,8 @@ import { SiteHeader } from '@/components/layout';
 import { ScannerFlow } from '@/components/scanner';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-black">
