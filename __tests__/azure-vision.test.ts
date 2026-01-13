@@ -21,17 +21,21 @@ process.env.AZURE_CUSTOM_VISION_ITERATION_NAME = process.env.AZURE_CUSTOM_VISION
 describe('Azure Custom Vision Integration', () => {
   const testImagesPath = path.join(__dirname, 'fixtures', 'images');
 
-  // Skip tests if Azure credentials are not configured
-  const isAzureConfigured = 
-    process.env.AZURE_CUSTOM_VISION_PREDICTION_KEY !== 'test-key' &&
-    process.env.AZURE_CUSTOM_VISION_ENDPOINT !== 'https://test.cognitiveservices.azure.com';
+    // Skip tests if Azure credentials are not configured
+    const isAzureConfigured = 
+      process.env.AZURE_CUSTOM_VISION_PREDICTION_KEY !== 'test-key' &&
+      process.env.AZURE_CUSTOM_VISION_ENDPOINT !== 'https://test.cognitiveservices.azure.com';
+
+    // Avoid running live integration tests in CI environments by default
+    const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+    const runAzureIntegration = isAzureConfigured && !isCi;
 
   describe('Custom Vision Service', () => {
     test('should initialize with correct configuration', () => {
       expect(customVisionService).toBeDefined();
     });
 
-    (isAzureConfigured ? test : test.skip)('should classify genuine paddy seed image', async () => {
+    (runAzureIntegration ? test : test.skip)('should classify genuine paddy seed image', async () => {
       const imagePath = path.join(testImagesPath, 'genuine-seed.jpg');
       
       if (!fs.existsSync(imagePath)) {
@@ -54,7 +58,7 @@ describe('Azure Custom Vision Integration', () => {
       }
     }, 10000); // 10 second timeout for API call
 
-    (isAzureConfigured ? test : test.skip)('should detect fake seed packaging', async () => {
+    (runAzureIntegration ? test : test.skip)('should detect fake seed packaging', async () => {
       const imagePath = path.join(testImagesPath, 'fake-seed.jpg');
       
       if (!fs.existsSync(imagePath)) {
@@ -74,7 +78,7 @@ describe('Azure Custom Vision Integration', () => {
       }
     }, 10000);
 
-    (isAzureConfigured ? test : test.skip)('should classify using image URL', async () => {
+    (runAzureIntegration ? test : test.skip)('should classify using image URL', async () => {
       const testImageUrl = 'https://example.com/test-seed-image.jpg';
       
       try {
@@ -95,7 +99,7 @@ describe('Azure Custom Vision Integration', () => {
       ).rejects.toThrow();
     });
 
-    (isAzureConfigured ? test : test.skip)('should extract seed variety from tag', async () => {
+    (runAzureIntegration ? test : test.skip)('should extract seed variety from tag', async () => {
       const imagePath = path.join(testImagesPath, 'genuine-seed.jpg');
       
       if (!fs.existsSync(imagePath)) {
@@ -139,7 +143,7 @@ describe('Azure Custom Vision Integration', () => {
   });
 
   describe('Batch Classification', () => {
-    (isAzureConfigured ? test : test.skip)('should classify multiple images', async () => {
+    (runAzureIntegration ? test : test.skip)('should classify multiple images', async () => {
       const image1Path = path.join(testImagesPath, 'genuine-seed.jpg');
       const image2Path = path.join(testImagesPath, 'fake-seed.jpg');
       
@@ -162,7 +166,7 @@ describe('Azure Custom Vision Integration', () => {
   });
 
   describe('Performance', () => {
-    (isAzureConfigured ? test : test.skip)('should complete classification within timeout', async () => {
+    (runAzureIntegration ? test : test.skip)('should complete classification within timeout', async () => {
       const imagePath = path.join(testImagesPath, 'genuine-seed.jpg');
       
       if (!fs.existsSync(imagePath)) {
