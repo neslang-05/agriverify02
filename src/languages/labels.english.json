@@ -1,0 +1,98 @@
+{
+    "app": {
+        "title": "Seed Packet Verification",
+        "description": "Verify the authenticity of your seed packets"
+    },
+    "navigation": {
+        "home": "Home",
+        "verify": "Verify",
+        "history": "History",
+        "about": "About"
+    },
+    "verification": {
+        "title": "Verify Seed Packet",
+        "upload": "Upload Image",
+        "uploadDescription": "Take a clear photo of your seed packet",
+        "uploading": "Uploading...",
+        "analyzing": "Analyzing...",
+        "verifying": "Verifying authenticity...",
+        "dragDrop": "Drag and drop an image or click to browse",
+        "supported": "Supported formats: JPG, PNG (max 10MB)",
+        "result": "Verification Result",
+        "tryAgain": "Verify Another Packet"
+    },
+    "results": {
+        "genuine": "Genuine",
+        "suspicious": "Suspicious",
+        "fake": "Fake",
+        "unknown": "Unknown",
+        "confidence": "Confidence",
+        "qualityScore": "Quality Score",
+        "ocrResults": "Extracted Information",
+        "visionResults": "Visual Analysis",
+        "noData": "No data available"
+    },
+    "fields": {
+        "variety": "Variety",
+        "batchNumber": "Batch Number",
+        "expiryDate": "Expiry Date",
+        "manufacturer": "Manufacturer",
+        "price": "Price",
+        "weight": "Weight",
+        "lotNumber": "Lot Number"
+    },
+    "errors": {
+        "uploadFailed": "Upload failed. Please try again.",
+        "verificationFailed": "Verification failed. Please try again.",
+        "imageQualityLow": "Image quality is too low. Please take a clearer photo.",
+        "unsupportedFormat": "Unsupported file format.",
+        "fileTooLarge": "File is too large. Maximum size is 10MB.",
+        "networkError": "Network error. Please check your connection.",
+        "genericError": "An error occurred. Please try again."
+    },
+    "quality": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor",
+        "blurry": "Image is blurry",
+        "darkImage": "Image is too dark",
+        "brightImage": "Image is too bright",
+        "lowResolution": "Image resolution is too low",
+        "tips": "Tips for better results",
+        "tipGoodLighting": "Ensure good lighting",
+        "tipFocused": "Keep the camera focused",
+        "tipFullPacket": "Capture the full seed packet",
+        "tipNoGlare": "Avoid glare and reflections"
+    },
+    "history": {
+        "title": "Verification History",
+        "noHistory": "No verification history yet",
+        "date": "Date",
+        "result": "Result",
+        "viewDetails": "View Details",
+        "clear": "Clear History"
+    },
+    "about": {
+        "title": "About",
+        "description": "This application helps farmers verify the authenticity of seed packets using AI-powered image recognition and OCR technology.",
+        "howItWorks": "How It Works",
+        "step1": "Upload a clear photo of your seed packet",
+        "step2": "Our AI analyzes visual features and text",
+        "step3": "Get instant verification results",
+        "technology": "Powered by Azure Computer Vision and Custom Vision AI"
+    },
+    "common": {
+        "loading": "Loading...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "close": "Close",
+        "next": "Next",
+        "back": "Back",
+        "submit": "Submit",
+        "retry": "Retry",
+        "yes": "Yes",
+        "no": "No"
+    }
+}
