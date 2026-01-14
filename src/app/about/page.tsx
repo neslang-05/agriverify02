@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Leaf, Shield, Search, BarChart3, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GoogleTranslate } from '@/components/layout/google-translate';
 
 export default function AboutPage() {
   return (
@@ -13,9 +14,10 @@ export default function AboutPage() {
               <div className="h-10 w-10 flex items-center justify-center bg-emerald-800">
                 <Leaf className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-neutral-900">AgriVerify</span>
+              <span className="text-xl font-bold text-neutral-900 notranslate">AgriVerify</span>
             </Link>
             <div className="flex items-center gap-4">
+              <GoogleTranslate />
               <Link href="/login">
                 <Button variant="ghost" className="rounded-none">
                   Sign In

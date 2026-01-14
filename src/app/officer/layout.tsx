@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/app/actions/auth';
+import { GoogleTranslate } from '@/components/layout/google-translate';
 
 const navItems = [
   { href: '/officer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -111,6 +112,7 @@ export default function OfficerLayout({
           </div>
 
           <div className="flex items-center gap-4">
+            <GoogleTranslate />
             <div className="h-8 w-8 flex items-center justify-center bg-blue-100 text-blue-800 font-semibold">
               O
             </div>

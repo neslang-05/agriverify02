@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/app/actions/auth';
+import { GoogleTranslate } from '@/components/layout/google-translate';
 
 const navItems = [
   { href: '/farmer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -118,6 +119,7 @@ export default function FarmerLayout({
           </div>
 
           <div className="flex items-center gap-4">
+            <GoogleTranslate />
             <div className="h-8 w-8 flex items-center justify-center bg-emerald-100 text-emerald-800 font-semibold">
               F
             </div>
