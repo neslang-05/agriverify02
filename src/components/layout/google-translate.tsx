@@ -25,7 +25,6 @@ const languages = [
   { code: 'hi', label: 'Hindi', native: 'हिन्दी' },
   { code: 'bn', label: 'Bengali', native: 'বাংলা' },
   { code: 'mni-Mtei', label: 'Meetei Mayek', native: 'ꯃꯤꯇꯩ ꯃꯌꯦꯛ' },
-  { code: 'mni', label: 'Manipuri', native: 'মণিপুরী' },
   { code: 'as', label: 'Assamese', native: 'অসমীয়া' },
   { code: 'gu', label: 'Gujarati', native: 'ગુજરાતી' },
   { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ' },
