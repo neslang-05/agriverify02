@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
 export async function login(formData: FormData) {
@@ -78,8 +79,12 @@ export async function register(formData: FormData) {
   }
 
   if (data.user) {
-    // Create profile in profiles table
-    const { error: profileError } = await supabase
+    // Use the service-role admin client to insert the profile.
+    // The anon client cannot do this immediately after signUp() because
+    // the new user's JWT is not yet active (email confirmation pending),
+    // causing auth.uid() to be null and the RLS INSERT policy to reject it.
+    const adminSupabase = createAdminClient();
+    const { error: profileError } = await adminSupabase
       .from('profiles')
       .insert({
         id: data.user.id,
@@ -91,6 +96,7 @@ export async function register(formData: FormData) {
 
     if (profileError) {
       console.error('Profile creation error:', profileError);
+      // Non-fatal: the DB trigger will create the profile as a fallback.
     }
 
     revalidatePath('/', 'layout');

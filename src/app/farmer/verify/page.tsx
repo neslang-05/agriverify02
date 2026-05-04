@@ -15,6 +15,8 @@ import { ImageUploader } from '@/components/farmer/image-uploader';
 import { VerificationResult as VerificationResultComponent } from '@/components/farmer/verification-result';
 import { uploadAndVerify } from '@/app/actions/verification';
 import { VerificationResult } from '@/types';
+import { predictSeedImage } from '@/lib/edge/teachable-machine-client';
+import { toast } from 'sonner';
 
 type Step = 'upload' | 'processing' | 'result';
 
@@ -45,16 +47,47 @@ export default function VerifyPage() {
     
     setStep('processing');
 
-    const formData = new FormData();
-    formData.append('frontImage', frontImage);
-    formData.append('backImage', backImage);
-
     try {
+      // 1. Client-side Fast Inference for Seed Verification
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(frontImage);
+      
+      img.src = objectUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      try {
+        const prediction = await predictSeedImage(img);
+        
+        if (!prediction.isSeed && prediction.confidence > 0.6) {
+          toast.error('Invalid Image Detected', {
+            description: 'This does not appear to be a seed packet. Please upload a clear image of a seed packet.',
+          });
+          setStep('upload');
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+      } catch (inferenceError) {
+        console.error('TM inference failed, falling back to cloud:', inferenceError);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+
+      // 2. Proceed to Cloud Processing
+      const formData = new FormData();
+      formData.append('frontImage', frontImage);
+      formData.append('backImage', backImage);
+
       const verificationResult = await uploadAndVerify(formData);
       setResult(verificationResult);
       setStep('result');
     } catch (error) {
       console.error('Verification failed:', error);
+      toast.error('Verification Failed', {
+        description: 'An error occurred during verification. Please try again.',
+      });
       setStep('upload');
     }
   };

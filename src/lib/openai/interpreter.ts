@@ -129,7 +129,7 @@ Example output for non-seed image:
         ],
         response_format: { type: "json_object" },
         temperature: 0.5, // Low temperature for consistency
-        max_tokens: 200
+        max_completion_tokens: 200
       });
 
       const content = response.choices[0].message.content;

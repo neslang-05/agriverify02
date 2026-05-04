@@ -24,8 +24,8 @@ import { GoogleTranslate } from '@/components/layout/google-translate';
 const navItems = [
   { href: '/farmer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/farmer/quality', label: 'Quality Check', icon: CheckCircle2 },
-  { href: '/farmer/verify', label: 'Verify Product', icon: Search },
-  { href: '/farmer/recommendations', label: 'Recommendations', icon: Sprout },
+  // { href: '/farmer/verify', label: 'Verify Product', icon: Search },
+  // { href: '/farmer/recommendations', label: 'Recommendations', icon: Sprout },
   { href: '/farmer/complaints', label: 'My Complaints', icon: MessageSquareWarning },
   { href: '/farmer/chat', label: 'AI Assistant', icon: MessageSquare },
   { href: '/farmer/profile', label: 'My Profile', icon: User },
@@ -51,9 +51,8 @@ export default function FarmerLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-neutral-200 transform transition-transform lg:transform-none ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-neutral-200 transform transition-transform lg:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -73,11 +72,10 @@ export default function FarmerLayout({
                 <Link key={item.href} href={item.href}>
                   <motion.div
                     whileTap={{ scale: 0.98 }}
-                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                      isActive
-                        ? 'bg-emerald-50 border-l-4 border-emerald-800 text-emerald-800'
-                        : 'text-neutral-600 hover:bg-neutral-100'
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${isActive
+                      ? 'bg-emerald-50 border-l-4 border-emerald-800 text-emerald-800'
+                      : 'text-neutral-600 hover:bg-neutral-100'
+                      }`}
                   >
                     <Icon className="h-5 w-5" />
                     <span className="font-medium">{item.label}</span>
