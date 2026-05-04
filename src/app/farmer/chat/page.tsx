@@ -8,7 +8,7 @@ import { getChatResponse } from '@/app/actions/verification';
 
 export default function ChatPage() {
   const handleSendMessage = async (message: string): Promise<string> => {
-    const response = await getChatResponse(message, 'demo-user');
+    const response = await getChatResponse(message);
     return response;
   };
 

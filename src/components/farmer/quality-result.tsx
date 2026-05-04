@@ -43,7 +43,7 @@ export function QualityResult({ result, imageUrl }: QualityResultProps) {
         badgeVariant: "default" as const,
         description: "Seeds meet quality standards"
       };
-    } else if (tag === "negative") {
+    } else if (tag === "negative" || tag === "impure") {
       return {
         label: "Negative Quality",
         icon: XCircle,

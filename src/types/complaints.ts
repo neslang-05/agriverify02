@@ -6,7 +6,7 @@ export type ComplaintIssueType =
   | 'physical_impurity'
   | 'other';
 
-export type ComplaintStatus = 'open' | 'investigating' | 'resolved';
+export type ComplaintStatus = 'received' | 'under_review' | 'finished';
 export type RiskLevel = 'normal' | 'suspicious' | 'high_risk';
 
 export interface ProductComplaint {

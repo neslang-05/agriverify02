@@ -5,7 +5,7 @@ import { VerificationStatus, VerificationResult, Product, SeedRecommendation } f
 import { getOpenAIClient } from '@/lib/azure/openai';
 import { AGRICULTURAL_KNOWLEDGE_BASE } from '@/lib/knowledge-base';
 import { classifyWithFallback } from '@/lib/azure/custom-vision-fallback';
-import { saveVerificationHistory } from './history';
+import { saveVerificationHistory, uploadImageToStorage } from './history';
 import { interpreter } from '@/lib/openai/interpreter';
 import type { VerificationWithAISummary } from '@/types/packet-verification';
 
@@ -141,8 +141,9 @@ function performVisionVerification(
 
   // Vision AI primary check - Pure/Negative classification
   const tag = visionResult.topPrediction.tag.toLowerCase();
+  const isBadTag = tag === 'negative' || tag === 'impure' || tag === 'fake';
   
-  if (tag === 'negative' || !visionResult.isAuthentic) {
+  if (isBadTag || !visionResult.isAuthentic) {
     riskFactors.push('Vision AI detected low quality or counterfeit characteristics');
   }
 
@@ -152,7 +153,7 @@ function performVisionVerification(
   
   if (tag === 'pure' && finalConfidence >= 60) {
     status = 'genuine';
-  } else if (tag === 'negative') {
+  } else if (isBadTag) {
     status = finalConfidence >= 50 ? 'suspicious' : 'fake';
   } else {
     status = finalConfidence >= 75 ? 'genuine' 
@@ -242,13 +243,21 @@ export async function uploadAndVerify(formData: FormData): Promise<HybridVerific
       // Execute Vision AI classification
       const visionResult = await classifyWithFallback(imageBuffer, imageUrl);
 
+      // Upload to Supabase Storage for permanent record
+      let permanentUrl = imageUrl;
+      try {
+        permanentUrl = await uploadImageToStorage(imageBuffer, file.name || 'verification.jpg');
+      } catch (uploadErr) {
+        console.error('Failed to upload image to storage, using base64 fallback:', uploadErr);
+      }
+
       // Perform verification based on Vision AI result
       const result = performVisionVerification(visionResult, cropType, district);
       
       // Save to history (non-blocking)
       // Note: confidence from GCP is already 0-100, convert to 0-1 for database
       saveVerificationHistory({
-        image_url: imageUrl,
+        image_url: permanentUrl,
         status: result.status,
         confidence: result.confidence / 100,
         vision_ai_tag: result.visionAI?.tag,
@@ -307,6 +316,14 @@ export async function uploadAndVerifyWithAI(formData: FormData): Promise<Verific
     // 1. Run GCP Custom Vision classification
     const visionResult = await classifyWithFallback(imageBuffer, base64Image);
 
+    // Upload to Supabase Storage for permanent record
+    let permanentUrl = base64Image;
+    try {
+      permanentUrl = await uploadImageToStorage(imageBuffer, file.name || 'verification.jpg');
+    } catch (uploadErr) {
+      console.error('Failed to upload image to storage, using base64 fallback:', uploadErr);
+    }
+
     // 2. Run OpenAI synthesis for human-friendly interpretation
     let simplified;
     try {
@@ -354,7 +371,7 @@ export async function uploadAndVerifyWithAI(formData: FormData): Promise<Verific
 
     // Save to history (non-blocking)
     saveVerificationHistory({
-      image_url: base64Image,
+      image_url: permanentUrl,
       status: simplified.status === 'good' ? 'genuine' : simplified.status === 'bad' ? 'fake' : 'suspicious',
       confidence: visionResult.topPrediction.confidence / 100,
       vision_ai_tag: visionResult.topPrediction.tag,
@@ -444,7 +461,7 @@ export async function getSeedRecommendations(
   return recommendations.slice(0, 3) as SeedRecommendation[];
 }
 
-export async function getChatResponse(message: string, userId: string): Promise<string> {
+export async function getChatResponse(message: string, userId?: string): Promise<string> {
   // Check if Azure OpenAI is enabled
   if (process.env.ENABLE_AZURE_OPENAI_CHAT !== 'true') {
     return getFallbackResponse(message);

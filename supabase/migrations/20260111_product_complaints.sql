@@ -32,7 +32,7 @@ CREATE TABLE product_complaints (
   field_image_url TEXT,
   
   -- Meta
-  status VARCHAR(50) DEFAULT 'open', -- open, investigating, resolved
+  status VARCHAR(50) DEFAULT 'received', -- received, under_review, finished
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

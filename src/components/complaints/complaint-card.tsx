@@ -11,17 +11,17 @@ interface ComplaintCardProps {
 
 export function ComplaintCard({ complaint, onAction }: ComplaintCardProps) {
   const statusStyles: Record<ComplaintStatus, { icon: any; color: string; bgColor: string }> = {
-    open: {
+    received: {
       icon: MessageSquareWarning,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-100',
     },
-    investigating: {
+    under_review: {
       icon: AlertCircle,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
     },
-    resolved: {
+    finished: {
       icon: CheckCircle,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
@@ -37,7 +37,14 @@ export function ComplaintCard({ complaint, onAction }: ComplaintCardProps) {
     other: 'Other',
   };
 
-  const StatusIcon = statusStyles[complaint.status].icon;
+  // Handle legacy statuses for backward compatibility with old seed data
+  const normalizedStatus = (complaint.status as string) === 'open' ? 'received' :
+                         (complaint.status as string) === 'investigating' ? 'under_review' :
+                         (complaint.status as string) === 'resolved' ? 'finished' : 
+                         complaint.status;
+
+  const currentStatusStyle = statusStyles[normalizedStatus as ComplaintStatus] || statusStyles.received;
+  const StatusIcon = currentStatusStyle.icon;
 
   return (
     <Card className="rounded-none border-l-4 border-l-gray-400 shadow-sm">
@@ -52,8 +59,8 @@ export function ComplaintCard({ complaint, onAction }: ComplaintCardProps) {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <div className={`p-2 rounded-none ${statusStyles[complaint.status].bgColor}`}>
-              <StatusIcon className={`w-5 h-5 ${statusStyles[complaint.status].color}`} />
+            <div className={`p-2 rounded-none ${currentStatusStyle.bgColor}`}>
+              <StatusIcon className={`w-5 h-5 ${currentStatusStyle.color}`} />
             </div>
           </div>
         </div>
@@ -94,7 +101,7 @@ export function ComplaintCard({ complaint, onAction }: ComplaintCardProps) {
             variant="outline"
             className="rounded-none border-gray-400 text-gray-700 capitalize"
           >
-            {complaint.status}
+            {complaint.status.replace('_', ' ')}
           </Badge>
         </div>
       </CardContent>

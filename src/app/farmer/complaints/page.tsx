@@ -18,9 +18,9 @@ export default async function ComplaintsPage() {
 
   const stats = {
     total: complaints.length,
-    open: complaints.filter((c) => c.status === 'open').length,
-    investigating: complaints.filter((c) => c.status === 'investigating').length,
-    resolved: complaints.filter((c) => c.status === 'resolved').length,
+    received: complaints.filter((c) => c.status === 'received').length,
+    under_review: complaints.filter((c) => c.status === 'under_review').length,
+    finished: complaints.filter((c) => c.status === 'finished').length,
   };
 
   return (
@@ -50,20 +50,20 @@ export default async function ComplaintsPage() {
           </Card>
           <Card className="rounded-none border-l-4 border-l-yellow-400">
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-yellow-600">{stats.open}</div>
-              <p className="text-sm text-gray-600">Open</p>
+              <div className="text-2xl font-bold text-yellow-600">{stats.received}</div>
+              <p className="text-sm text-gray-600">Received</p>
             </CardContent>
           </Card>
           <Card className="rounded-none border-l-4 border-l-blue-400">
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-blue-600">{stats.investigating}</div>
-              <p className="text-sm text-gray-600">Investigating</p>
+              <div className="text-2xl font-bold text-blue-600">{stats.under_review}</div>
+              <p className="text-sm text-gray-600">Under Review</p>
             </CardContent>
           </Card>
           <Card className="rounded-none border-l-4 border-l-green-400">
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
-              <p className="text-sm text-gray-600">Resolved</p>
+              <div className="text-2xl font-bold text-green-600">{stats.finished}</div>
+              <p className="text-sm text-gray-600">Finished</p>
             </CardContent>
           </Card>
         </div>

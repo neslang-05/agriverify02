@@ -20,8 +20,9 @@ import { GoogleTranslate } from '@/components/layout/google-translate';
 const navItems = [
   { href: '/officer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/officer/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/officer/verifications', label: 'Verifications', icon: Leaf },
   { href: '/officer/complaints', label: 'Complaints', icon: AlertTriangle },
-  { href: '/officer/complaints/list', label: 'All Complaints', icon: List },
+  { href: '/officer/workflow', label: 'Workflow', icon: List },
 ];
 
 export default function OfficerLayout({

@@ -274,7 +274,7 @@ export async function getAnalytics(
   };
 }
 
-export async function getFarmerStats(userId: string) {
+export async function getFarmerStats(userId?: string) {
   const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
   if (isDemoMode) {
@@ -294,10 +294,26 @@ export async function getFarmerStats(userId: string) {
 
   const supabase = await createClient();
 
+  let targetUserId = userId;
+  if (!targetUserId || targetUserId === 'demo-user') {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return {
+        totalVerifications: 0,
+        genuineCount: 0,
+        suspiciousCount: 0,
+        fakeCount: 0,
+        lastVerification: new Date().toISOString(),
+        averageConfidence: 0,
+      };
+    }
+    targetUserId = user.id;
+  }
+
   const { data: verifications, error } = await supabase
     .from('verification_history')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', targetUserId)
     .order('created_at', { ascending: false });
 
   if (error) {

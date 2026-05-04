@@ -14,6 +14,12 @@ export interface VerificationHistoryItem {
   vision_ai_confidence?: number;
   seed_variety?: string;
   recommendation?: string;
+  user_id?: string;
+  profiles?: {
+    full_name: string;
+    email: string;
+    district: string;
+  };
 }
 
 export async function getVerificationHistory(limit = 20) {
@@ -106,19 +112,14 @@ export async function saveVerificationHistory(verificationData: {
   try {
     const supabase = await createClient();
     
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (authError || !user) {
-      return {
-        success: false,
-        error: "Not authenticated"
-      };
-    }
-
+    // If no user, we still save it (anonymous verification)
+    // The database column user_id must be nullable
     const { data, error } = await supabase
       .from("verification_history")
       .insert({
-        user_id: user.id,
+        user_id: user?.id || null,
         ...verificationData
       })
       .select()
@@ -217,5 +218,98 @@ export async function getUserVerifications() {
   } catch (error) {
     console.error("Error in getUserVerifications:", error);
     return [];
+  }
+}
+
+export async function getAllVerificationsForOfficer(limit = 100) {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    return {
+      success: true,
+      data: DEMO_VERIFICATION_HISTORY.map(item => ({
+        ...item,
+        profiles: {
+          full_name: 'Demo Farmer',
+          email: 'farmer@example.com',
+          district: 'Imphal West'
+        }
+      }))
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+    
+    // Check if user is officer or admin
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Unauthorized" };
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || (profile.role !== 'officer' && profile.role !== 'admin')) {
+      return { success: false, error: "Unauthorized access" };
+    }
+
+    const { data, error } = await supabase
+      .from("verification_history")
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          email,
+          district
+        )
+      `)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error fetching all verifications:", error);
+      return { success: false, error: "Failed to fetch records" };
+    }
+
+    return {
+      success: true,
+      data: data as VerificationHistoryItem[]
+    };
+  } catch (error) {
+    console.error("All verifications error:", error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+export async function uploadImageToStorage(file: File | Buffer, fileName: string) {
+  try {
+    const supabase = await createClient();
+    
+    // Determine the storage path
+    const path = `verifications/${Date.now()}-${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('verifications')
+      .upload(path, file, {
+        contentType: 'image/jpeg',
+        upsert: true
+      });
+
+    if (error) {
+      console.error("Storage upload error:", error);
+      throw error;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('verifications')
+      .getPublicUrl(path);
+
+    return publicUrl;
+  } catch (error) {
+    console.error("Error in uploadImageToStorage:", error);
+    throw new Error("Failed to upload image to storage");
   }
 }

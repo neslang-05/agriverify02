@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RiskLevelBadge } from '@/components/complaints/risk-level-badge';
-import { getHighRiskBatches, getComplaintStats } from '@/app/actions/complaints';
+import { getHighRiskBatches, getComplaintStats, getAllComplaints } from '@/app/actions/complaints';
+import { ComplaintsList } from './complaints-list';
 import { AlertTriangle, TrendingUp, MapPin } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -15,12 +16,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ComplaintsPage() {
-  const [batches, stats] = await Promise.all([getHighRiskBatches(), getComplaintStats()]);
+  const [batches, stats, allComplaints] = await Promise.all([getHighRiskBatches(), getComplaintStats(), getAllComplaints()]);
 
   // Separate by risk level
   const highRiskBatches = batches.filter((b) => b.risk_level === 'high_risk');
   const suspiciousBatches = batches.filter((b) => b.risk_level === 'suspicious');
-  const normalBatches = batches.filter((b) => b.risk_level === 'normal');
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
@@ -188,54 +188,10 @@ export default async function ComplaintsPage() {
           </Card>
         )}
 
-        {/* Normal Batches */}
-        {normalBatches.length > 0 && (
-          <Card className="rounded-none shadow-md border-l-4 border-l-green-600">
-            <CardHeader>
-              <CardTitle className="text-lg text-green-700">Normal: Compliant Batches</CardTitle>
-              <CardDescription>Less than 3 complaints</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto max-h-96">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Batch #</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Brand</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Total Complaints</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Districts Affected</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Risk Level</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {normalBatches.map((batch) => (
-                      <tr key={batch.batch_number} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-mono text-gray-900">{batch.batch_number}</td>
-                        <td className="py-3 px-4 text-gray-700">{batch.brand_name || 'N/A'}</td>
-                        <td className="py-3 px-4 text-center">
-                          <Badge className="rounded-none bg-green-100 text-green-700 hover:bg-green-100">
-                            {batch.total_complaints}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <Badge className="rounded-none bg-gray-100 text-gray-700 hover:bg-gray-100">
-                            {batch.unique_districts}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <RiskLevelBadge level={batch.risk_level} size="sm" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <ComplaintsList initialComplaints={allComplaints} />
 
-        {batches.length === 0 && (
-          <Card className="rounded-none">
+        {batches.length === 0 && allComplaints.length === 0 && (
+          <Card className="rounded-none mt-8">
             <CardContent className="pt-16 pb-16 flex flex-col items-center justify-center text-center">
               <AlertTriangle className="w-12 h-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No complaints reported</h3>

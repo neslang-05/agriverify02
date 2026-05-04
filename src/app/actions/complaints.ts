@@ -37,7 +37,7 @@ export async function submitComplaint(
       days_since_sowing: data.daysSinceSowing,
       severity_score: data.severityScore,
       field_image_url: data.fieldImageUrl,
-      status: 'open',
+      status: 'received',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -75,7 +75,7 @@ export async function submitComplaint(
         severity_score: data.severityScore,
         verification_id: data.verificationId,
         field_image_url: data.fieldImageUrl,
-        status: 'open',
+        status: 'received',
       })
       .select()
       .single();
@@ -216,7 +216,7 @@ export async function getBatchComplaints(
 
 export async function updateComplaintStatus(
   complaintId: string,
-  status: 'open' | 'investigating' | 'resolved'
+  status: 'received' | 'under_review' | 'finished'
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createClient();
@@ -252,6 +252,7 @@ export async function updateComplaintStatus(
     }
 
     revalidatePath('/officer/complaints');
+    revalidatePath('/officer/workflow');
 
     return { success: true };
   } catch (error) {
@@ -295,6 +296,7 @@ export async function assignComplaint(
     await logAuditEvent('assign_complaint', 'complaint', complaintId, { officer_id: officerId });
 
     revalidatePath('/officer/complaints');
+    revalidatePath('/officer/workflow');
     revalidatePath('/admin');
     return { success: true };
   } catch (error) {
@@ -333,7 +335,7 @@ export async function addInvestigationNote(
     }
 
     revalidatePath('/officer/complaints');
-    revalidatePath('/officer/complaints/list');
+    revalidatePath('/officer/workflow');
     revalidatePath('/farmer/complaints');
     return { success: true };
   } catch (error) {

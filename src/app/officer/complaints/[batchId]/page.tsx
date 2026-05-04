@@ -117,9 +117,9 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
           <Card className="rounded-none">
             <CardContent className="pt-6">
               <div className="text-3xl font-bold text-green-600">
-                {complaints.filter((c) => c.status === 'resolved').length}
+                {complaints.filter((c) => c.status === 'finished').length}
               </div>
-              <p className="text-sm text-gray-600 mt-1">Resolved</p>
+              <p className="text-sm text-gray-600 mt-1">Finished</p>
             </CardContent>
           </Card>
         </div>
@@ -143,7 +143,7 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
                       {districtComplaints.length}
                     </div>
                     <p className="text-xs text-gray-600">
-                      {districtComplaints.filter((c) => c.status === 'resolved').length} resolved
+                      {districtComplaints.filter((c) => c.status === 'finished').length} finished
                     </p>
                   </div>
                 ))}

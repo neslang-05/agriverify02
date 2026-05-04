@@ -198,8 +198,8 @@ CREATE TABLE IF NOT EXISTS public.product_complaints (
   days_since_sowing    INTEGER,
   severity_score       INTEGER                   CHECK (severity_score BETWEEN 1 AND 5),
   field_image_url      TEXT,
-  status               VARCHAR(50)               NOT NULL DEFAULT 'open'
-                                                 CHECK (status IN ('open', 'investigating', 'resolved')),
+  status               VARCHAR(50)               NOT NULL DEFAULT 'received'
+                                                 CHECK (status IN ('received', 'under_review', 'finished')),
   investigation_notes  TEXT,
   created_at           TIMESTAMPTZ               NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ               NOT NULL DEFAULT NOW()
