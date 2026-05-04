@@ -39,7 +39,7 @@ export default async function AuditLogsPage() {
                 {logs.map((log: {
                   id: string;
                   created_at: string;
-                  actor?: { full_name?: string; email?: string };
+                  actor?: { full_name?: string; email?: string } | null;
                   actor_role?: string;
                   action: string;
                   target_type?: string;

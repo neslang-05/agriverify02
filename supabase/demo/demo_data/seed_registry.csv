@@ -1,0 +1,31 @@
+id,brand_name,product_name,crop_type,variety_name,manufacturer_name,manufacturer_license,certification_number,is_active,created_at
+40beeb1f-dfe2-406b-8b13-a42a96c383e1,Kaveri,Kaveri Maize Hybrid 270,Maize,V-25,Kaveri Agri Ltd,LIC-90093,CERT-826787,True,2026-05-03 15:57:40+00
+9c4b686e-cdbc-44eb-8585-5c67cad45f84,Mahyco,Mahyco Chilli Hybrid 169,Chilli,V-54,Mahyco Agri Ltd,LIC-27347,CERT-303908,True,2026-04-07 21:02:40+00
+f6ff9154-8013-40f3-8203-f1238361be04,Kaveri,Kaveri Tomato Hybrid 750,Tomato,V-66,Kaveri Agri Ltd,LIC-89621,CERT-695581,True,2026-04-22 18:32:40+00
+8db9d4aa-dd49-4e0c-8f03-fa5e6ca4717f,Monsanto,Monsanto Chilli Hybrid 173,Chilli,V-69,Monsanto Agri Ltd,LIC-15432,CERT-643569,True,2026-03-07 11:16:40+00
+40cabadf-edc2-4696-a6fc-a33ceb8c4c21,Rasi Seeds,Rasi Seeds Mustard Hybrid 766,Mustard,V-52,Rasi Seeds Agri Ltd,LIC-29499,CERT-778808,True,2026-04-11 11:58:40+00
+75ff8d63-0900-41d7-9d8e-d7a6bb5b945f,Nuziveedu,Nuziveedu Tomato Hybrid 301,Tomato,V-67,Nuziveedu Agri Ltd,LIC-32161,CERT-501391,True,2026-03-23 10:42:40+00
+0a1b54a5-db63-4d76-b9fc-274afeacc0ed,Mahyco,Mahyco Maize Hybrid 181,Maize,V-80,Mahyco Agri Ltd,LIC-58489,CERT-284977,True,2026-03-10 23:44:40+00
+5e55976a-ce06-4e96-b392-91749ed98b27,Kaveri,Kaveri Tomato Hybrid 436,Tomato,V-35,Kaveri Agri Ltd,LIC-99824,CERT-745749,True,2026-05-03 22:47:40+00
+2b617711-f947-46da-9092-ebe8823ad6ce,Kaveri,Kaveri Tomato Hybrid 468,Tomato,V-23,Kaveri Agri Ltd,LIC-71217,CERT-753799,True,2026-04-05 11:44:40+00
+1473a0b1-09e1-47c4-af83-8eee1f0fc9b5,Mahyco,Mahyco Potato Hybrid 310,Potato,V-17,Mahyco Agri Ltd,LIC-54097,CERT-388025,True,2026-03-14 00:13:40+00
+1485bd63-4646-4023-8d0a-f0d69aa0b8c4,Syngenta,Syngenta Maize Hybrid 739,Maize,V-43,Syngenta Agri Ltd,LIC-51544,CERT-249621,True,2026-03-26 04:01:40+00
+55e144a2-fe7d-4e61-8ea3-f9e93b115341,Monsanto,Monsanto Mustard Hybrid 179,Mustard,V-23,Monsanto Agri Ltd,LIC-46784,CERT-307000,True,2026-04-22 19:12:40+00
+d6275a5a-e00d-4857-bbe0-07070df7370f,Mahyco,Mahyco Potato Hybrid 372,Potato,V-57,Mahyco Agri Ltd,LIC-37076,CERT-250494,True,2026-04-06 00:34:40+00
+251614c3-bc7d-46a2-b4a6-864ccefd75ae,Monsanto,Monsanto Tomato Hybrid 630,Tomato,V-55,Monsanto Agri Ltd,LIC-65457,CERT-822551,True,2026-04-16 00:27:40+00
+e78897d3-5973-46a3-b0c4-2fa5fca5c958,Nuziveedu,Nuziveedu Potato Hybrid 860,Potato,V-89,Nuziveedu Agri Ltd,LIC-52818,CERT-448064,True,2026-04-30 09:43:40+00
+9087c0c7-691b-4d22-bb0a-ee7b5f8346d7,Rasi Seeds,Rasi Seeds Mustard Hybrid 450,Mustard,V-27,Rasi Seeds Agri Ltd,LIC-94411,CERT-743784,True,2026-04-09 09:56:40+00
+0e648f87-e524-4576-a8de-50dfe330ad73,Syngenta,Syngenta Maize Hybrid 404,Maize,V-78,Syngenta Agri Ltd,LIC-73751,CERT-563896,True,2026-03-16 18:43:40+00
+798dacfb-aba0-40a9-a21f-4a9b76b17f61,Nuziveedu,Nuziveedu Wheat Hybrid 547,Wheat,V-90,Nuziveedu Agri Ltd,LIC-21481,CERT-821158,True,2026-03-29 19:10:40+00
+80ccbe6d-60f5-48b5-b888-95483691ddfc,Nuziveedu,Nuziveedu Maize Hybrid 539,Maize,V-53,Nuziveedu Agri Ltd,LIC-15609,CERT-134522,True,2026-03-24 01:09:40+00
+4fcd3f22-145c-40f5-a46b-1b94556788c8,Nuziveedu,Nuziveedu Potato Hybrid 747,Potato,V-17,Nuziveedu Agri Ltd,LIC-66660,CERT-874119,True,2026-03-25 13:08:40+00
+026c6af5-9a98-4806-bed5-41346089c700,Nuziveedu,Nuziveedu Maize Hybrid 118,Maize,V-92,Nuziveedu Agri Ltd,LIC-72787,CERT-530897,True,2026-03-15 10:11:40+00
+de7ca91e-ac22-4cad-8cff-b221ec303504,Rasi Seeds,Rasi Seeds Potato Hybrid 523,Potato,V-66,Rasi Seeds Agri Ltd,LIC-24208,CERT-949617,True,2026-04-23 21:47:40+00
+faf603e7-f40f-4b0f-81f7-d0a32620f666,Syngenta,Syngenta Mustard Hybrid 510,Mustard,V-13,Syngenta Agri Ltd,LIC-41133,CERT-939627,True,2026-04-21 14:53:40+00
+a10f0520-255c-4ada-8490-68da5f6b996c,Kaveri,Kaveri Rice Hybrid 253,Rice,V-99,Kaveri Agri Ltd,LIC-20550,CERT-241071,True,2026-04-21 22:26:40+00
+5cd65c06-cf41-49aa-8160-aafebda679e8,Monsanto,Monsanto Wheat Hybrid 143,Wheat,V-32,Monsanto Agri Ltd,LIC-53424,CERT-538144,True,2026-03-19 01:53:40+00
+47e9eebb-0d04-4e36-972d-31e60bf21664,JK Seeds,JK Seeds Maize Hybrid 287,Maize,V-70,JK Seeds Agri Ltd,LIC-56614,CERT-356763,True,2026-03-11 00:40:40+00
+3bf82eef-a61b-4640-9669-c17d5b07cf59,Kaveri,Kaveri Wheat Hybrid 219,Wheat,V-28,Kaveri Agri Ltd,LIC-91539,CERT-151181,True,2026-04-10 19:18:40+00
+f89091ed-0829-4967-b3b4-d59484d1f74e,JK Seeds,JK Seeds Potato Hybrid 755,Potato,V-50,JK Seeds Agri Ltd,LIC-25064,CERT-188086,True,2026-04-16 20:52:40+00
+aa3d44cd-e8e7-4343-8716-e760424d758f,Mahyco,Mahyco Maize Hybrid 394,Maize,V-95,Mahyco Agri Ltd,LIC-86408,CERT-881301,True,2026-04-15 18:31:40+00
+f17c3888-0735-496a-ae6f-e2f4e7b7a2f8,Rasi Seeds,Rasi Seeds Rice Hybrid 319,Rice,V-73,Rasi Seeds Agri Ltd,LIC-47929,CERT-730078,True,2026-03-08 11:39:40+00

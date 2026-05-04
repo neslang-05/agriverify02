@@ -27,7 +27,7 @@ const navItems = [
   // { href: '/farmer/verify', label: 'Verify Product', icon: Search },
   // { href: '/farmer/recommendations', label: 'Recommendations', icon: Sprout },
   { href: '/farmer/complaints', label: 'My Complaints', icon: MessageSquareWarning },
-  { href: '/farmer/chat', label: 'AI Assistant', icon: MessageSquare },
+  // { href: '/farmer/chat', label: 'AI Assistant', icon: MessageSquare },
   { href: '/farmer/profile', label: 'My Profile', icon: User },
 ];
 

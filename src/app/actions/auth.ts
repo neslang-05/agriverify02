@@ -105,14 +105,8 @@ export async function register(formData: FormData) {
     }
 
     revalidatePath('/', 'layout');
-
-    if (role === 'admin') {
-      redirect('/admin/dashboard');
-    } else if (role === 'officer') {
-      redirect('/officer/dashboard');
-    } else {
-      redirect('/farmer/dashboard');
-    }
+    // Registration is farmer-only (enforced above), so always redirect here.
+    redirect('/farmer/dashboard');
   }
 }
 
