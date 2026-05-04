@@ -23,7 +23,7 @@ const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const ADMIN_EMAIL = 'admin@fakeseed.com';
+const ADMIN_EMAIL = 'admin@mail.com';
 const ADMIN_PASSWORD = '1234567890';
 const ADMIN_FULL_NAME = 'System Administrator';
 

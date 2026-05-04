@@ -27,14 +27,6 @@ async function AdminStats() {
       bg: 'bg-indigo-50',
     },
     {
-      title: 'High-Risk Batches',
-      value: complaintStats.highRiskBatchesCount,
-      sub: 'Flagged in registry',
-      icon: ShieldAlert,
-      color: 'text-red-700',
-      bg: 'bg-red-50',
-    },
-    {
       title: "Today's Complaints",
       value: complaintStats.todayComplaintsCount,
       sub: 'Submitted today',
@@ -42,18 +34,10 @@ async function AdminStats() {
       color: 'text-amber-700',
       bg: 'bg-amber-50',
     },
-    {
-      title: 'Worst District',
-      value: complaintStats.worstPerformingDistrict,
-      sub: 'Most complaints',
-      icon: BarChart3,
-      color: 'text-blue-700',
-      bg: 'bg-blue-50',
-    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {stats.map((s) => {
         const Icon = s.icon;
         return (

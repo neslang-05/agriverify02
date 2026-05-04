@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Leaf, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Leaf, Mail, Lock, User, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,8 +19,18 @@ import { register } from '@/app/actions/auth';
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     // Role is always 'farmer' — officers and admins are provisioned separately
@@ -43,25 +53,25 @@ export default function RegisterPage() {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center h-16 w-16 bg-emerald-800 mb-4">
+          <div className="inline-flex items-center justify-center h-16 w-16 bg-emerald-800 mb-4 shadow-xl">
             <Leaf className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-neutral-900">AgriVerify</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">AgriVerify</h1>
           <p className="text-neutral-500 mt-1">Farmer Registration</p>
         </div>
 
-        <Card className="rounded-none shadow-lg border-none">
-          <CardHeader className="space-y-1 pb-4">
+        <Card className="rounded-none shadow-2xl border-none overflow-hidden">
+          <CardHeader className="space-y-1 pb-6 pt-8 bg-emerald-800 text-white">
             <CardTitle className="text-xl font-semibold text-center">
               Sign Up
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-emerald-100/80">
               Create your farmer account to get started
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-8">
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 text-sm">
+              <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-800 text-sm">
                 {error}
               </div>
             )}
@@ -105,21 +115,49 @@ export default function RegisterPage() {
                   <Input
                     id="password"
                     name="password"
-                    type="password"
-                    placeholder="Create a password (min. 6 characters)"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min. 6 characters"
                     required
                     minLength={6}
-                    className="rounded-none pl-10 border-2 focus:border-emerald-800 focus-visible:ring-0"
+                    className="rounded-none pl-10 pr-10 border-2 focus:border-emerald-800 focus-visible:ring-0"
                     disabled={isLoading}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
 
-              {/* Role is fixed as Farmer — Officers and Admins are provisioned by admins */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Re-enter your password"
+                    required
+                    className="rounded-none pl-10 pr-10 border-2 focus:border-emerald-800 focus-visible:ring-0"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
 
               <Button
                 type="submit"
-                className="w-full rounded-none bg-emerald-800 hover:bg-emerald-900"
+                className="w-full rounded-none bg-emerald-800 hover:bg-emerald-900 h-12 mt-4"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -133,11 +171,11 @@ export default function RegisterPage() {
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-neutral-500">
+            <p className="mt-8 text-center text-sm text-neutral-500">
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="font-medium text-emerald-800 hover:text-emerald-900"
+                className="font-medium text-emerald-800 hover:text-emerald-900 border-b-2 border-emerald-800 pb-0.5"
               >
                 Sign in
               </Link>

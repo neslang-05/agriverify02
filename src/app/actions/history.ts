@@ -114,12 +114,27 @@ export async function saveVerificationHistory(verificationData: {
     
     const { data: { user } } = await supabase.auth.getUser();
     
-    // If no user, we still save it (anonymous verification)
-    // The database column user_id must be nullable
+    let userIdToSave = null;
+    
+    if (user) {
+      // Check if profile exists to avoid foreign key violation
+      // (happens if session is for a user deleted during DB reset)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .single();
+      
+      if (profile) {
+        userIdToSave = user.id;
+      }
+    }
+    
+    // If no valid profile, we save it (anonymous verification)
     const { data, error } = await supabase
       .from("verification_history")
       .insert({
-        user_id: user?.id || null,
+        user_id: userIdToSave,
         ...verificationData
       })
       .select()

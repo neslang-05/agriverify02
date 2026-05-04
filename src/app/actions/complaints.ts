@@ -216,8 +216,17 @@ export async function getBatchComplaints(
 
 export async function updateComplaintStatus(
   complaintId: string,
-  status: 'received' | 'under_review' | 'finished'
+  status: ComplaintStatus
 ): Promise<{ success: boolean; error?: string }> {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    // In demo mode, just return success to allow UI updates
+    revalidatePath('/officer/workflow');
+    revalidatePath('/officer/complaints');
+    return { success: true };
+  }
+
   try {
     const supabase = await createClient();
 
@@ -230,20 +239,23 @@ export async function updateComplaintStatus(
       return { success: false, error: 'User not authenticated' };
     }
 
-    // Verify user is an officer
-    const { data: userData } = await supabase
-      .from('auth.users')
-      .select('raw_user_meta_data')
+    // Verify user is an officer or admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
       .eq('id', user.id)
       .single();
 
-    if (userData?.raw_user_meta_data?.role !== 'officer') {
+    if (profile?.role !== 'officer' && profile?.role !== 'admin') {
       return { success: false, error: 'Only officers can update complaint status' };
     }
 
     const { error } = await supabase
       .from('product_complaints')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({ 
+        status, 
+        updated_at: new Date().toISOString() 
+      })
       .eq('id', complaintId);
 
     if (error) {
@@ -251,8 +263,12 @@ export async function updateComplaintStatus(
       return { success: false, error: 'Failed to update complaint status' };
     }
 
+    // Revalidate relevant paths
     revalidatePath('/officer/complaints');
     revalidatePath('/officer/workflow');
+    revalidatePath('/officer/dashboard');
+    revalidatePath('/farmer/complaints');
+    revalidatePath('/farmer/dashboard');
 
     return { success: true };
   } catch (error) {

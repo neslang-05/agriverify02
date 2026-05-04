@@ -1,16 +1,31 @@
 id,user_id,verification_id,assigned_officer_id,batch_number,brand_name,crop_type,district,issue_type,description,severity_score,status,created_at
-61a28410-5f83-4f48-a8af-3c4fc5c6323e,11eccc01-1638-4062-b563-7474e77ffe00,26f56077-bbc1-4877-9e58-c234e7ce716c,fed3f24b-969f-46f3-8ad4-3b4bd5f39da9,BATCH-8974,Mahyco,Maize,Tengnoupal,other,Observed issues with germination in Tengnoupal.,3,open,2026-05-03 17:11:40+00
-e2e1a99e-e52a-4e56-ac58-9147ca77a3e3,bca6715e-0db4-4e73-ad4d-89dc0bc60ba1,bbc91ac6-76c7-483b-98bc-8f2f00ae036e,1c6f91ae-0089-4f55-a743-dc80952d4309,BATCH-5457,Kaveri,Wheat,Kamjong,other,Observed issues with germination in Kamjong.,1,investigating,2026-03-15 23:50:40+00
-22f844a2-c152-4c95-bc45-d6474409dc1c,26d1d0ec-2717-4cf4-97e7-e25c9c50d83c,fc6c99c4-5538-40a8-ac72-dba79f6aa2f9,80f3159f-a76a-47bf-bf7b-917d95df0749,BATCH-5903,Nuziveedu,Maize,Kangpokpi,other,Observed issues with germination in Kangpokpi.,3,resolved,2026-04-09 07:27:40+00
-f0921c6e-afa0-4660-9411-60ce1882dce1,08329ff6-dcd5-4767-a95d-b428f9f78f78,fe1438d4-9592-4339-be12-8b65f3d1cd92,80f3159f-a76a-47bf-bf7b-917d95df0749,BATCH-4142,Mahyco,Chilli,Thoubal,poor_germination,Observed issues with germination in Thoubal.,5,resolved,2026-03-22 04:14:40+00
-29851317-3de1-4b77-ba86-ef38b8d707ff,404a6bc5-6a34-4cdd-bf4d-2e0f5433e3bd,79151124-258c-42ea-8c48-edcd5c6fab1e,80f3159f-a76a-47bf-bf7b-917d95df0749,BATCH-1804,Rasi,Mustard,Kangpokpi,no_yield,Observed issues with germination in Kangpokpi.,3,investigating,2026-04-22 23:09:40+00
-1d689c98-8f92-44ce-afcb-bb9b3298a9db,c89c23fc-2d51-4b79-a781-4b62fe1bd927,250ed9c1-b52e-49c8-8e09-33087c072899,1c6f91ae-0089-4f55-a743-dc80952d4309,BATCH-1071,Kaveri,Maize,Chandel,stunted_growth,Observed issues with germination in Chandel.,5,open,2026-04-06 00:39:40+00
-1afd817c-5444-49c8-bf91-24b89cba60a1,1094560a-6097-469f-98fc-cf5a68abfd16,81857d31-d214-4c39-b656-b14ec22d5462,05885028-b0f2-4c90-8c02-252edb73c635,BATCH-9256,Mahyco,Maize,Pherzawl,no_yield,Observed issues with germination in Pherzawl.,2,investigating,2026-03-20 11:33:40+00
-33e5035a-d1f2-481c-b005-e553ed124686,0e758853-777a-41ac-a9b5-d3285eff8178,902f0800-56af-44ba-88be-ae60ba37472e,9b411218-5b41-4d70-acca-a20b0874a6d7,BATCH-7499,JK,Potato,Thoubal,no_yield,Observed issues with germination in Thoubal.,3,open,2026-04-09 17:20:40+00
-0c261012-a8b2-431b-82c8-9b702280b6b9,c587dc64-3487-44f4-ae99-28ddc43dc623,db58dbb4-cd4d-406a-be46-6bd5e3e041e4,05885028-b0f2-4c90-8c02-252edb73c635,BATCH-2953,Mahyco,Chilli,Senapati,other,Observed issues with germination in Senapati.,5,open,2026-04-24 08:49:40+00
-5f2d2624-fa75-45ee-b62c-7e7914a5cb68,32c4d7bd-29ad-4566-98ed-1f03e3f9990d,8920f357-a9b6-4631-9629-69ee592682b3,05885028-b0f2-4c90-8c02-252edb73c635,BATCH-9510,Kaveri,Maize,Churachandpur,stunted_growth,Observed issues with germination in Churachandpur.,4,open,2026-03-04 21:41:40+00
-1501a3bc-3a82-457b-80ee-c8913c2dbcda,8d0b4473-3ed0-41d3-8bf6-90fd18c5a6ff,f6607be2-720c-4f7e-961e-c1f11df67648,80f3159f-a76a-47bf-bf7b-917d95df0749,BATCH-7538,Mahyco,Maize,Bishnupur,physical_impurity,Observed issues with germination in Bishnupur.,3,resolved,2026-04-26 12:57:40+00
-d4d992d7-2fb8-4f73-a379-03520e893a68,11eccc01-1638-4062-b563-7474e77ffe00,895870d9-7c3c-423a-9979-bc5364ed4fc8,80f3159f-a76a-47bf-bf7b-917d95df0749,BATCH-7651,Mahyco,Potato,Tengnoupal,pest_susceptibility,Observed issues with germination in Tengnoupal.,3,resolved,2026-03-11 11:09:40+00
-59633066-42ce-4f59-84e9-efbfdbd8ee57,b0f528fc-1837-49bc-8aba-9b91e3956534,b4a938ee-4d92-4309-adbf-1399b9767020,1c6f91ae-0089-4f55-a743-dc80952d4309,BATCH-6491,Monsanto,Wheat,Imphal West,other,Observed issues with germination in Imphal West.,2,resolved,2026-03-17 21:42:40+00
-5bef7e0a-5fef-45a8-9839-41870a0477aa,d0dba60b-a694-4c5b-8872-cbe3acd2206b,24e746ec-7295-4cdb-8bc4-7c8014393795,fed3f24b-969f-46f3-8ad4-3b4bd5f39da9,BATCH-6132,Nuziveedu,Potato,Kakching,stunted_growth,Observed issues with germination in Kakching.,5,open,2026-05-04 07:07:40+00
-f2684b95-f152-4387-af54-193edada317d,7b606994-6e78-4dbb-a29a-77e37894d8b9,167f9ee7-c27a-4954-acce-12cab00be410,d8e5526a-702c-425c-88c4-9eadd068e7ff,BATCH-5910,Nuziveedu,Tomato,Imphal West,physical_impurity,Observed issues with germination in Imphal West.,4,investigating,2026-04-27 18:27:40+00
+comp-1,farmer-1,vh-1,officer-1,BATCH-MP-001,RC Maniphou,Paddy,Churachandpur,poor_germination,Poor germination reported.,3,received,2026-05-04 11:00:00+00
+comp-2,farmer-2,vh-2,officer-2,BATCH-MP-002,RC Maniphou,Paddy,Senapati,stunted_growth,Stunted growth observed.,2,under_review,2026-05-04 10:30:00+00
+comp-3,farmer-3,vh-3,officer-3,BATCH-MP-003,RC Maniphou,Paddy,Ukhrul,no_yield,No yield after 3 months.,5,received,2026-05-04 10:00:00+00
+comp-4,farmer-4,vh-4,officer-1,BATCH-MP-004,RC Maniphou,Paddy,Chandel,pest_susceptibility,High pest susceptibility.,4,finished,2026-05-04 09:30:00+00
+comp-5,farmer-5,vh-5,officer-2,BATCH-MP-005,RC Maniphou,Paddy,Tamenglong,physical_impurity,Physical impurities found.,1,received,2026-05-04 09:00:00+00
+comp-6,farmer-6,vh-6,officer-3,BATCH-MP-006,RC Maniphou,Paddy,Jiribam,other,General quality issues.,3,under_review,2026-05-04 08:30:00+00
+comp-7,farmer-7,vh-7,officer-1,BATCH-MP-007,RC Maniphou,Paddy,Kangpokpi,poor_germination,Low germination rate.,4,received,2026-05-04 08:00:00+00
+comp-8,farmer-8,vh-8,officer-2,BATCH-MP-008,RC Maniphou,Paddy,Kakching,stunted_growth,Plants not growing tall.,2,finished,2026-05-04 07:30:00+00
+comp-9,farmer-9,vh-9,officer-3,BATCH-MP-009,RC Maniphou,Paddy,Tengnoupal,no_yield,Empty grains observed.,5,received,2026-05-04 07:00:00+00
+comp-10,farmer-10,vh-10,officer-1,BATCH-MP-010,RC Maniphou,Paddy,Kamjong,pest_susceptibility,Stem borer attack.,4,under_review,2026-05-04 06:30:00+00
+comp-11,farmer-11,vh-11,officer-2,BATCH-MP-011,RC Maniphou,Paddy,Noney,physical_impurity,Mixed with other seeds.,2,received,2026-05-04 06:00:00+00
+comp-12,farmer-12,vh-12,officer-3,BATCH-MP-012,RC Maniphou,Paddy,Pherzawl,other,Color is off.,1,finished,2026-05-04 05:30:00+00
+comp-13,farmer-13,vh-13,officer-1,BATCH-MP-013,RC Maniphou,Paddy,Imphal West,poor_germination,Only 50% germinated.,3,received,2026-05-04 05:00:00+00
+comp-14,farmer-14,vh-14,officer-2,BATCH-MP-014,RC Maniphou,Paddy,Imphal East,stunted_growth,Leaves turning yellow.,3,under_review,2026-05-04 04:30:00+00
+comp-15,farmer-15,vh-15,officer-3,BATCH-MP-015,RC Maniphou,Paddy,Thoubal,no_yield,Grain filling is poor.,4,received,2026-05-04 04:00:00+00
+comp-16,farmer-16,vh-16,officer-1,BATCH-MP-016,RC Maniphou,Paddy,Bishnupur,pest_susceptibility,Blast disease observed.,5,finished,2026-05-04 03:30:00+00
+comp-17,farmer-17,vh-17,officer-2,BATCH-MP-017,RC Maniphou,Paddy,Churachandpur,physical_impurity,Stones found in packet.,2,received,2026-05-04 03:00:00+00
+comp-18,farmer-18,vh-18,officer-3,BATCH-MP-018,RC Maniphou,Paddy,Senapati,other,Strange smell.,1,under_review,2026-05-04 02:30:00+00
+comp-19,farmer-19,vh-19,officer-1,BATCH-MP-019,RC Maniphou,Paddy,Ukhrul,poor_germination,Germination is very late.,3,received,2026-05-04 02:00:00+00
+comp-20,farmer-20,vh-20,officer-2,BATCH-MP-020,RC Maniphou,Paddy,Chandel,stunted_growth,Uneven growth.,2,finished,2026-05-04 01:30:00+00
+comp-21,farmer-21,vh-21,officer-3,BATCH-MP-021,RC Maniphou,Paddy,Tamenglong,no_yield,Yield is half of expected.,4,received,2026-05-04 01:00:00+00
+comp-22,farmer-22,vh-22,officer-1,BATCH-MP-022,RC Maniphou,Paddy,Jiribam,pest_susceptibility,Severe leaf folder.,5,under_review,2026-05-04 00:30:00+00
+comp-23,farmer-23,vh-23,officer-2,BATCH-MP-023,RC Maniphou,Paddy,Kangpokpi,physical_impurity,Contains weed seeds.,3,received,2026-05-04 00:00:00+00
+comp-24,farmer-24,vh-24,officer-3,BATCH-MP-024,RC Maniphou,Paddy,Kakching,other,Moisture level is high.,2,finished,2026-05-03 23:30:00+00
+comp-25,farmer-25,vh-25,officer-1,BATCH-MP-025,RC Maniphou,Paddy,Tengnoupal,poor_germination,Fungal growth in seeds.,5,received,2026-05-03 23:00:00+00
+comp-26,farmer-1,vh-26,officer-2,BATCH-MP-026,RC Maniphou,Paddy,Churachandpur,stunted_growth,Plants are dwarf.,3,under_review,2026-05-03 22:30:00+00
+comp-27,farmer-2,vh-27,officer-3,BATCH-MP-027,RC Maniphou,Paddy,Senapati,no_yield,Sterility in flowers.,4,received,2026-05-03 22:00:00+00
+comp-28,farmer-3,vh-28,officer-1,BATCH-MP-028,RC Maniphou,Paddy,Ukhrul,pest_susceptibility,Gall midge attack.,5,finished,2026-05-03 21:30:00+00
+comp-29,farmer-4,vh-29,officer-2,BATCH-MP-029,RC Maniphou,Paddy,Chandel,physical_impurity,Broken seeds found.,2,received,2026-05-03 21:00:00+00
+comp-30,farmer-5,vh-30,officer-3,BATCH-MP-030,RC Maniphou,Paddy,Tamenglong,other,Weight is less than labeled.,1,under_review,2026-05-03 20:30:00+00
