@@ -5,9 +5,11 @@ import {
   ComplaintSubmission,
   ProductComplaint,
   BatchRiskRegistry,
+  ComplaintStatus,
 } from '@/types/complaints';
 import { revalidatePath } from 'next/cache';
 import { DEMO_COMPLAINTS, DEMO_BATCH_REGISTRY, DEMO_COMPLAINT_STATS } from '@/lib/demo-data';
+import { logAuditEvent } from './admin';
 import { getCurrentUser } from './auth';
 
 export async function submitComplaint(
@@ -290,7 +292,6 @@ export async function assignComplaint(
       return { success: false, error: 'Failed to assign complaint' };
     }
 
-    const { logAuditEvent } = await import('./admin');
     await logAuditEvent('assign_complaint', 'complaint', complaintId, { officer_id: officerId });
 
     revalidatePath('/officer/complaints');

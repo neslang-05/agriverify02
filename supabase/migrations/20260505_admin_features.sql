@@ -4,7 +4,7 @@ ALTER TABLE product_complaints
   ADD COLUMN IF NOT EXISTS investigation_notes TEXT;
 
 -- Officers can update complaints assigned to them
-CREATE POLICY "Officers can view assigned complaints" ON product_complaints FOR UPDATE
+CREATE POLICY "Officers can update assigned complaints" ON product_complaints FOR UPDATE
   USING (assigned_officer_id = auth.uid());
 
 -- Create audit_logs table
