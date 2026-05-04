@@ -1,18 +1,18 @@
-import { customVisionService } from './custom-vision';
+import { gcpVisionService } from '../gcp-vision';
 
 export async function classifyWithFallback(
   imageBuffer: Buffer,
   imageUrl: string
 ) {
   try {
-    // Primary: Azure Custom Vision
-    return await customVisionService.classifyImage(imageBuffer);
+    // Primary: Google Cloud Run Custom Model
+    return await gcpVisionService.classifyImage(imageBuffer);
   } catch (error) {
-    console.error('Azure Vision failed, attempting fallback:', error);
+    console.error('GCP Vision failed, attempting fallback:', error);
     
     try {
-      // Fallback 1: Try URL method
-      return await customVisionService.classifyImageUrl(imageUrl);
+      // Fallback 1: Try URL method if available
+      return await gcpVisionService.classifyImageUrl(imageUrl);
     } catch (urlError) {
       console.error('URL method failed:', urlError);
       
@@ -24,7 +24,7 @@ export async function classifyWithFallback(
           confidence: 0
         },
         isAuthentic: false,
-        error: 'Azure Custom Vision service unavailable'
+        error: 'GCP Vision service unavailable'
       };
     }
   }

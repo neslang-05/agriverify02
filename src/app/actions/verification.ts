@@ -5,7 +5,6 @@ import { VerificationStatus, VerificationResult, Product, SeedRecommendation } f
 import { getOpenAIClient } from '@/lib/azure/openai';
 import { AGRICULTURAL_KNOWLEDGE_BASE } from '@/lib/knowledge-base';
 import { classifyWithFallback } from '@/lib/azure/custom-vision-fallback';
-import { performOCR, OCRResult } from '@/lib/azure/computer-vision-ocr';
 import { saveVerificationHistory } from './history';
 import { interpreter } from '@/lib/openai/interpreter';
 import type { VerificationWithAISummary } from '@/types/packet-verification';
@@ -131,12 +130,11 @@ function isBlacklistedBrand(brand?: string): boolean {
   return BLACKLISTED_BRANDS.some(b => brand.toLowerCase().includes(b.toLowerCase()));
 }
 
-// Vision AI verification with OCR
+// Vision AI verification
 function performVisionVerification(
   visionResult: any,
   cropType: string,
-  district: string,
-  ocrResult?: OCRResult
+  district: string
 ): HybridVerificationResult {
   const riskFactors: string[] = [];
   let baseConfidence = visionResult.topPrediction.confidence;
@@ -146,11 +144,6 @@ function performVisionVerification(
   
   if (tag === 'negative' || !visionResult.isAuthentic) {
     riskFactors.push('Vision AI detected low quality or counterfeit characteristics');
-  }
-
-  // Add OCR-based risk factors if available
-  if (ocrResult && ocrResult.suspiciousFlags && ocrResult.suspiciousFlags.length > 0) {
-    riskFactors.push(...ocrResult.suspiciousFlags);
   }
 
   // Determine final status based on tag and confidence
@@ -175,7 +168,7 @@ function performVisionVerification(
     product_id: crypto.randomUUID(),
     status,
     confidence: Math.round(finalConfidence),
-    detected_text: ocrResult?.detectedText || '',
+    detected_text: '',
     risk_explanation: riskExplanation,
     recommendations,
     verified_at: new Date().toISOString(),
@@ -184,16 +177,6 @@ function performVisionVerification(
       confidence: visionResult.topPrediction.confidence,
       seedVariety: visionResult.seedVariety
     },
-    ocr: ocrResult ? {
-      detectedText: ocrResult.detectedText,
-      brandName: ocrResult.brandName,
-      certificationNumber: ocrResult.certificationNumber,
-      batchNumber: ocrResult.batchNumber,
-      manufacturingDate: ocrResult.manufacturingDate,
-      expiryDate: ocrResult.expiryDate,
-      confidence: ocrResult.confidence * 100,
-      suspiciousFlags: ocrResult.suspiciousFlags
-    } : undefined,
     riskFactors
   };
 }
@@ -245,32 +228,25 @@ export async function uploadAndVerify(formData: FormData): Promise<HybridVerific
   const file = formData.get('image') as File;
 
   try {
-    // Check if Azure Custom Vision is configured
-    const isAzureConfigured = process.env.AZURE_CUSTOM_VISION_PREDICTION_KEY && 
-                              process.env.AZURE_CUSTOM_VISION_ENDPOINT;
+    // Check if GCP Vision is configured (with fallback to default endpoint)
+    const isGCPConfigured = true; // GCP endpoint is always available with default
 
-    if (isAzureConfigured && file) {
-      // Convert file to buffer for Azure Vision API
+    if (isGCPConfigured && file) {
+      // Convert file to buffer for GCP Vision API
       const arrayBuffer = await file.arrayBuffer();
       const imageBuffer = Buffer.from(arrayBuffer);
       
       // Create temporary URL for the image
       const imageUrl = `data:${file.type};base64,${imageBuffer.toString('base64')}`;
 
-      // Execute Vision AI classification and OCR in parallel
-      const [visionResult, ocrResult] = await Promise.all([
-        classifyWithFallback(imageBuffer, imageUrl),
-        performOCR(imageBuffer).catch(err => {
-          console.error('OCR failed:', err);
-          return undefined;
-        })
-      ]);
+      // Execute Vision AI classification
+      const visionResult = await classifyWithFallback(imageBuffer, imageUrl);
 
-      // Perform verification based on Vision AI result and OCR
-      const result = performVisionVerification(visionResult, cropType, district, ocrResult);
+      // Perform verification based on Vision AI result
+      const result = performVisionVerification(visionResult, cropType, district);
       
       // Save to history (non-blocking)
-      // Note: confidence from Azure is already 0-100, convert to 0-1 for database
+      // Note: confidence from GCP is already 0-100, convert to 0-1 for database
       saveVerificationHistory({
         image_url: imageUrl,
         status: result.status,
@@ -285,10 +261,10 @@ export async function uploadAndVerify(formData: FormData): Promise<HybridVerific
       return result;
     }
   } catch (error) {
-    console.error('Azure Vision verification failed, falling back to mock:', error);
+    console.error('GCP Vision verification failed, falling back to mock:', error);
   }
 
-  // Fallback to original mock verification if Azure is not configured or fails
+  // Fallback to original mock verification if model inference fails
   const scenarios = ['genuine', 'suspicious', 'fake'] as const;
   const scenario = scenarios[Math.floor(Math.random() * 3)];
   const ocrResponse = MOCK_OCR_RESPONSES[scenario];
@@ -326,15 +302,9 @@ export async function uploadAndVerifyWithAI(formData: FormData): Promise<Verific
     const imageBuffer = Buffer.from(arrayBuffer);
     const base64Image = `data:${file.type};base64,${imageBuffer.toString('base64')}`;
 
-    // Check if Azure Custom Vision is configured
-    const isAzureConfigured = process.env.AZURE_CUSTOM_VISION_PREDICTION_KEY && 
-                              process.env.AZURE_CUSTOM_VISION_ENDPOINT;
-
-    if (!isAzureConfigured) {
-      throw new Error('Azure Custom Vision not configured');
-    }
-
-    // 1. Run Custom Vision classification
+    // GCP Vision is configured by default - proceed with classification
+    
+    // 1. Run GCP Custom Vision classification
     const visionResult = await classifyWithFallback(imageBuffer, base64Image);
 
     // 2. Run OpenAI synthesis for human-friendly interpretation

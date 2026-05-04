@@ -51,9 +51,8 @@ cp .env.local.example .env.local
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
-# Azure Computer Vision
-AZURE_COMPUTER_VISION_ENDPOINT=your-vision-endpoint
-AZURE_COMPUTER_VISION_KEY=your-vision-key
+# Google Cloud Run Custom Model
+GCP_VISION_ENDPOINT=https://resnet-api-297419987783.asia-south1.run.app/predict
 
 # Azure Custom Vision
 AZURE_CUSTOM_VISION_PREDICTION_URL=your-custom-vision-url
@@ -74,16 +73,12 @@ AZURE_OPENAI_API_VERSION=2024-02-15-preview
 
 ### Azure Setup Instructions
 
-#### 1. Azure Computer Vision
-- Create a Computer Vision resource in Azure Portal
-- Copy the endpoint and key to your environment variables
-
-#### 2. Azure Custom Vision
+#### 1. Azure Custom Vision
 - Create a Custom Vision resource
 - Train a model for seed/fertilizer classification
 - Publish the model and note the prediction URL and keys
 
-#### 3. Azure OpenAI
+#### 2. Azure OpenAI
 - Apply for Azure OpenAI access
 - Create an OpenAI resource
 - Deploy a GPT model (e.g., gpt-4o-mini)

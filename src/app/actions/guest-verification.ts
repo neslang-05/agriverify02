@@ -1,6 +1,6 @@
 'use server';
 
-import { customVisionService } from '@/lib/azure/custom-vision';
+import { gcpVisionService } from '@/lib/gcp-vision';
 import { interpreter } from '@/lib/openai/interpreter';
 import type { VerificationWithAISummary } from '@/types/packet-verification';
 
@@ -43,7 +43,7 @@ export async function processGuestImages(base64Images: string[]): Promise<GuestV
         const buffer = Buffer.from(base64Data, 'base64');
         
         try {
-          return await customVisionService.classifyImage(buffer);
+          return await gcpVisionService.classifyImage(buffer);
         } catch (error) {
           console.error('Error classifying image:', error);
           // Return a fallback result for failed classifications
@@ -152,7 +152,7 @@ export async function storeGuestScanData(
 
 /**
  * Process single seed image with AI-powered synthesis
- * Uses Azure Custom Vision for technical analysis + Azure OpenAI for human-friendly interpretation
+ * Uses Google Cloud Run ResNet Model for technical analysis + Azure OpenAI for human-friendly interpretation
  */
 export async function processSeedImageWithAI(
   base64Image: string
@@ -162,8 +162,8 @@ export async function processSeedImageWithAI(
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // 2. Run Custom Vision (The "Hard" Data)
-    const visionResult = await customVisionService.classifyImage(buffer);
+    // 2. Run GCP Vision (The "Hard" Data)
+    const visionResult = await gcpVisionService.classifyImage(buffer);
 
     // 3. Run OpenAI Synthesis (The "Soft" Interpretation)
     // Pass both the visual and the data for context
