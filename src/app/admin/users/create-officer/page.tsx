@@ -111,7 +111,7 @@ export default function CreateOfficerPage() {
 
               <div className="space-y-1.5">
                 <Label>District</Label>
-                <Select onValueChange={setDistrict} required>
+                <Select onValueChange={setDistrict}>
                   <SelectTrigger className="rounded-none">
                     <SelectValue placeholder="Select district" />
                   </SelectTrigger>

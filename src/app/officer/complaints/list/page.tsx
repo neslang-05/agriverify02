@@ -27,10 +27,16 @@ export default function AllComplaintsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllComplaints().then((data) => {
-      setComplaints(data);
-      setLoading(false);
-    });
+    getAllComplaints()
+      .then((data) => {
+        setComplaints(data);
+      })
+      .catch((err) => {
+        console.error('Failed to load complaints:', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const filtered =

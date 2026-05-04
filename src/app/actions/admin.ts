@@ -151,7 +151,10 @@ export async function logAuditEvent(
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      console.warn('logAuditEvent: no authenticated user, skipping audit log for action:', action);
+      return;
+    }
 
     const { data: profile } = await supabase
       .from('profiles')

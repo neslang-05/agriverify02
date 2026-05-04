@@ -24,7 +24,7 @@ ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can view audit logs" ON audit_logs FOR SELECT
   USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin'));
 
-CREATE POLICY "Service can insert audit logs" ON audit_logs FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service can insert audit logs" ON audit_logs FOR INSERT WITH CHECK (actor_id = auth.uid());
 
 -- Note: 'admin' is a valid value for profiles.role alongside 'farmer' and 'officer'.
 -- Admin accounts are created by existing admins only (not via self-registration).

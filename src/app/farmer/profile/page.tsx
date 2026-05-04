@@ -59,7 +59,8 @@ export default function FarmerProfilePage() {
     setSaving(true);
     setError(null);
     setSuccess(false);
-    formData.set('district', district);
+    // district is managed via Select state; inject it into FormData before submitting
+    if (district) formData.set('district', district);
     try {
       const result = await updateProfile(formData);
       if (result?.error) {
