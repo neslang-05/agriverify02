@@ -23,6 +23,8 @@ export interface ProductComplaint {
   severity_score?: number;
   field_image_url?: string;
   status: ComplaintStatus;
+  assigned_officer_id?: string;
+  investigation_notes?: string;
   created_at: string;
   updated_at: string;
 }

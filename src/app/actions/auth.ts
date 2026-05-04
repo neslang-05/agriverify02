@@ -35,7 +35,9 @@ export async function login(formData: FormData) {
 
     revalidatePath('/', 'layout');
     
-    if (profile?.role === 'officer') {
+    if (profile?.role === 'admin') {
+      redirect('/admin/dashboard');
+    } else if (profile?.role === 'officer') {
       redirect('/officer/dashboard');
     } else {
       redirect('/farmer/dashboard');
@@ -93,7 +95,9 @@ export async function register(formData: FormData) {
 
     revalidatePath('/', 'layout');
 
-    if (role === 'officer') {
+    if (role === 'admin') {
+      redirect('/admin/dashboard');
+    } else if (role === 'officer') {
       redirect('/officer/dashboard');
     } else {
       redirect('/farmer/dashboard');
@@ -106,6 +110,42 @@ export async function logout() {
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
   redirect('/login');
+}
+
+export async function updateProfile(
+  formData: FormData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    const fullName = formData.get('fullName') as string;
+    const district = formData.get('district') as string;
+
+    if (!fullName) {
+      return { success: false, error: 'Full name is required' };
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName, district })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('Profile update error:', error);
+      return { success: false, error: 'Failed to update profile' };
+    }
+
+    revalidatePath('/farmer/profile');
+    return { success: true };
+  } catch (err) {
+    console.error('Error in updateProfile:', err);
+    return { success: false, error: 'An unexpected error occurred' };
+  }
 }
 
 export async function getCurrentUser() {

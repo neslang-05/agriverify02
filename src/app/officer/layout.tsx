@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   AlertTriangle,
+  List,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/app/actions/auth';
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/officer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/officer/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/officer/complaints', label: 'Complaints', icon: AlertTriangle },
+  { href: '/officer/complaints/list', label: 'All Complaints', icon: List },
 ];
 
 export default function OfficerLayout({

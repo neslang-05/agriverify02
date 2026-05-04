@@ -258,6 +258,119 @@ export async function updateComplaintStatus(
   }
 }
 
+export async function assignComplaint(
+  complaintId: string,
+  officerId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.role !== 'admin' && profile?.role !== 'officer') {
+      return { success: false, error: 'Insufficient permissions' };
+    }
+
+    const { error } = await supabase
+      .from('product_complaints')
+      .update({ assigned_officer_id: officerId, updated_at: new Date().toISOString() })
+      .eq('id', complaintId);
+
+    if (error) {
+      console.error('Error assigning complaint:', error);
+      return { success: false, error: 'Failed to assign complaint' };
+    }
+
+    const { logAuditEvent } = await import('./admin');
+    await logAuditEvent('assign_complaint', 'complaint', complaintId, { officer_id: officerId });
+
+    revalidatePath('/officer/complaints');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in assignComplaint:', error);
+    return { success: false, error: 'An unexpected error occurred' };
+  }
+}
+
+export async function addInvestigationNote(
+  complaintId: string,
+  note: string,
+  newStatus?: ComplaintStatus
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const updateData: Record<string, unknown> = {
+      investigation_notes: note,
+      updated_at: new Date().toISOString(),
+    };
+    if (newStatus) updateData.status = newStatus;
+
+    const { error } = await supabase
+      .from('product_complaints')
+      .update(updateData)
+      .eq('id', complaintId);
+
+    if (error) {
+      console.error('Error adding investigation note:', error);
+      return { success: false, error: 'Failed to add note' };
+    }
+
+    revalidatePath('/officer/complaints');
+    revalidatePath('/officer/complaints/list');
+    revalidatePath('/farmer/complaints');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in addInvestigationNote:', error);
+    return { success: false, error: 'An unexpected error occurred' };
+  }
+}
+
+export async function getAllComplaints(): Promise<ProductComplaint[]> {
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+  if (isDemoMode) {
+    return DEMO_COMPLAINTS;
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) return [];
+
+    const { data: complaints, error } = await supabase
+      .from('product_complaints')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching all complaints:', error.message || error);
+      return [];
+    }
+
+    return (complaints as ProductComplaint[]) || [];
+  } catch (error) {
+    console.error('Error in getAllComplaints:', error instanceof Error ? error.message : error);
+    return [];
+  }
+}
+
 export async function getComplaintStats() {
   const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 

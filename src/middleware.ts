@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Protected routes
-  const protectedPaths = ['/farmer', '/officer'];
+  const protectedPaths = ['/farmer', '/officer', '/admin'];
   const isProtectedPath = protectedPaths.some(path => 
     request.nextUrl.pathname.startsWith(path)
   );
@@ -46,6 +46,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Role-based access control for protected paths
+  if (isProtectedPath && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const role = profile?.role;
+    const url = request.nextUrl.clone();
+
+    if (request.nextUrl.pathname.startsWith('/admin') && role !== 'admin') {
+      url.pathname = role === 'officer' ? '/officer/dashboard' : '/farmer/dashboard';
+      return NextResponse.redirect(url);
+    }
+
+    if (
+      request.nextUrl.pathname.startsWith('/officer') &&
+      role !== 'officer' &&
+      role !== 'admin'
+    ) {
+      url.pathname = '/farmer/dashboard';
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Redirect to dashboard if accessing login/register while authenticated
   if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') && user) {
     const { data: profile } = await supabase
@@ -55,7 +81,13 @@ export async function middleware(request: NextRequest) {
       .single();
     
     const url = request.nextUrl.clone();
-    url.pathname = profile?.role === 'officer' ? '/officer/dashboard' : '/farmer/dashboard';
+    if (profile?.role === 'admin') {
+      url.pathname = '/admin/dashboard';
+    } else if (profile?.role === 'officer') {
+      url.pathname = '/officer/dashboard';
+    } else {
+      url.pathname = '/farmer/dashboard';
+    }
     return NextResponse.redirect(url);
   }
 
