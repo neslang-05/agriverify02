@@ -56,6 +56,11 @@ export async function register(formData: FormData) {
     throw new Error('All fields are required');
   }
 
+  // Only farmers can self-register. Officers and admins are provisioned by admins.
+  if (role !== 'farmer') {
+    throw new Error('Only farmer accounts can be created via registration. Contact an administrator for officer or admin access.');
+  }
+
   if (password.length < 6) {
     throw new Error('Password must be at least 6 characters');
   }

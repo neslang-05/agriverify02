@@ -128,21 +128,22 @@ export const CROP_TYPES = [
 ] as const;
 
 export const DISTRICTS = [
-  'Hyderabad',
-  'Warangal',
-  'Karimnagar',
-  'Nizamabad',
-  'Khammam',
-  'Nalgonda',
-  'Mahbubnagar',
-  'Rangareddy',
-  'Medak',
-  'Adilabad',
-  'Guntur',
-  'Krishna',
-  'Visakhapatnam',
-  'East Godavari',
-  'West Godavari',
+  'Bishnupur',
+  'Chandel',
+  'Churachandpur',
+  'Imphal East',
+  'Imphal West',
+  'Jiribam',
+  'Kakching',
+  'Kamjong',
+  'Kangpokpi',
+  'Noney',
+  'Pherzawl',
+  'Senapati',
+  'Tamenglong',
+  'Tengnoupal',
+  'Thoubal',
+  'Ukhrul',
 ] as const;
 
 export type CropType = (typeof CROP_TYPES)[number];

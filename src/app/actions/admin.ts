@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -40,7 +41,8 @@ export async function getSystemUsers(role?: string) {
 }
 
 export async function createOfficer(formData: FormData) {
-  const { supabase, user: adminUser } = await requireAdmin();
+  // requireAdmin validates the session and ensures the caller is an admin
+  await requireAdmin();
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
@@ -51,21 +53,26 @@ export async function createOfficer(formData: FormData) {
     throw new Error('All fields are required');
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  // Use the service-role admin client so that:
+  //   1. No confirmation email is sent (avoids the email rate-limit)
+  //   2. The account is immediately active (email_confirm: true)
+  //   3. RLS is bypassed for the profile upsert
+  const adminClient = createAdminClient();
+
+  const { data, error } = await adminClient.auth.admin.createUser({
     email,
     password,
-    options: {
-      data: {
-        full_name: fullName,
-        role: 'officer',
-      },
+    email_confirm: true,   // skips email confirmation entirely
+    user_metadata: {
+      full_name: fullName,
+      role: 'officer',
     },
   });
 
   if (error) throw new Error(error.message || 'Failed to create officer');
 
   if (data.user) {
-    const { error: profileError } = await supabase
+    const { error: profileError } = await adminClient
       .from('profiles')
       .upsert({
         id: data.user.id,
@@ -73,7 +80,7 @@ export async function createOfficer(formData: FormData) {
         full_name: fullName,
         role: 'officer',
         district,
-      });
+      }, { onConflict: 'id' });
 
     if (profileError) {
       console.error('Profile upsert error:', profileError);
@@ -129,9 +136,11 @@ export async function deleteUser(userId: string) {
 export async function getAuditLogs(limit = 50) {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase
+  // Step 1: fetch audit logs without a join (audit_logs.actor_id → auth.users,
+  // not public.profiles, so PostgREST cannot resolve the embedded relation)
+  const { data: logs, error } = await supabase
     .from('audit_logs')
-    .select('*, actor:profiles!actor_id(full_name, email)')
+    .select('id, created_at, actor_id, actor_role, action, target_type, target_id, details')
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -139,7 +148,29 @@ export async function getAuditLogs(limit = 50) {
     console.error('Error fetching audit logs:', error);
     return [];
   }
-  return data || [];
+
+  if (!logs || logs.length === 0) return [];
+
+  // Step 2: batch-fetch actor names from profiles using the actor_ids present
+  const actorIds = [...new Set(logs.map((l) => l.actor_id).filter(Boolean))];
+  let actorMap: Record<string, { full_name?: string; email?: string }> = {};
+
+  if (actorIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', actorIds);
+
+    if (profiles) {
+      actorMap = Object.fromEntries(profiles.map((p) => [p.id, { full_name: p.full_name, email: p.email }]));
+    }
+  }
+
+  // Merge actor info back — preserves the shape the page already expects
+  return logs.map((log) => ({
+    ...log,
+    actor: log.actor_id ? actorMap[log.actor_id] ?? null : null,
+  }));
 }
 
 export async function logAuditEvent(

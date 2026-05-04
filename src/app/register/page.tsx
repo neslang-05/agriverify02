@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Leaf, Mail, Lock, User, MapPin, Loader2 } from 'lucide-react';
+import { Leaf, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,24 +14,17 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { register } from '@/app/actions/auth';
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [role, setRole] = useState<string>('farmer');
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
     setError(null);
-    formData.set('role', role);
+    // Role is always 'farmer' — officers and admins are provisioned separately
+    formData.set('role', 'farmer');
     try {
       await register(formData);
       // Success - will redirect
@@ -54,7 +47,7 @@ export default function RegisterPage() {
             <Leaf className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-neutral-900">AgriVerify</h1>
-          <p className="text-neutral-500 mt-1">Create your account</p>
+          <p className="text-neutral-500 mt-1">Farmer Registration</p>
         </div>
 
         <Card className="rounded-none shadow-lg border-none">
@@ -63,7 +56,7 @@ export default function RegisterPage() {
               Sign Up
             </CardTitle>
             <CardDescription className="text-center">
-              Enter your details to create an account
+              Create your farmer account to get started
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -122,22 +115,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Role</Label>
-                <Select value={role} onValueChange={setRole} disabled={isLoading}>
-                  <SelectTrigger className="rounded-none border-2 focus:border-emerald-800 focus:ring-0">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none">
-                    <SelectItem value="farmer" className="rounded-none">
-                      Farmer
-                    </SelectItem>
-                    <SelectItem value="officer" className="rounded-none">
-                      Government Officer
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Role is fixed as Farmer — Officers and Admins are provisioned by admins */}
 
               <Button
                 type="submit"
